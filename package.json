@@ -1,0 +1,64 @@
+{
+  "name": "zentube",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first desktop playlist and media library manager.",
+  "main": "dist-electron/main/index.js",
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev:renderer": "vite --host 127.0.0.1",
+    "dev:electron": "npm run build:electron && wait-on http://127.0.0.1:5173 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .",
+    "build": "tsc -p tsconfig.json && vite build && npm run build:electron",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "rebuild:native": "electron-rebuild -f -w better-sqlite3",
+    "preview": "vite preview --host 127.0.0.1",
+    "start": "electron .",
+    "dist": "npm run build && electron-builder",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.electron.json"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.2",
+    "better-sqlite3": "^12.2.0",
+    "clsx": "^2.1.1",
+    "electron": "^38.1.0",
+    "lucide-react": "^0.542.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.2.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.3.1",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.0.0",
+    "electron-builder": "^26.0.12",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.4",
+    "wait-on": "^8.0.4"
+  },
+  "build": {
+    "appId": "local.zentube.app",
+    "productName": "Zentube",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "linux": {
+      "target": "AppImage",
+      "category": "AudioVideo"
+    }
+  },
+  "allowScripts": {
+    "electron@38.8.6": true,
+    "esbuild@0.28.2": true,
+    "better-sqlite3@12.11.1": true
+  }
+}

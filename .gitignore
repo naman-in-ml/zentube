@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-electron/
+release/
+*.log
+.env
+.env.*
+
+DEVPLAN-OfflinePlaylistManager-v1.md
