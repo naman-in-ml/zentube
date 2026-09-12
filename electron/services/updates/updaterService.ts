@@ -1,7 +1,5 @@
 import { app, BrowserWindow, ipcMain } from "electron";
-import electronUpdater from "electron-updater";
-
-const { autoUpdater } = electronUpdater;
+import { autoUpdater } from "electron-updater";
 
 export type UpdateStatus =
   | { state: "not-packaged" }
