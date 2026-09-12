@@ -6,4 +6,4 @@ release/
 .env
 .env.*
 
-DEVPLAN-OfflinePlaylistManager-v1.md
+DEVPLAN-*.md

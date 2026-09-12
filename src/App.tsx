@@ -1,10 +1,15 @@
-import { Clock3, Film, FolderPlus, ListMusic, Play, Plus, Search, Settings } from "lucide-react";
+import { Clock3, Download, Film, FolderPlus, ListMusic, Plus, Search, Settings } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { DownloadsView } from "./components/downloads/DownloadsView";
+import { LibraryGrid } from "./components/library/LibraryGrid";
+import { PlayerOverlay } from "./components/player/PlayerOverlay";
+import { SettingsView } from "./components/settings/SettingsView";
 
-type View = "library" | "playlists" | "queue" | "settings";
+type View = "library" | "playlists" | "queue" | "settings" | "downloads";
 
 const navItems: Array<{ id: View; label: string; icon: typeof Film }> = [
   { id: "library", label: "Library", icon: Film },
+  { id: "downloads", label: "Downloads", icon: Download },
   { id: "playlists", label: "Playlists", icon: ListMusic },
   { id: "queue", label: "Queue", icon: Clock3 },
   { id: "settings", label: "Settings", icon: Settings }
@@ -18,6 +23,7 @@ export function App() {
   const [selected, setSelected] = useState<MediaItem | null>(null);
   const [query, setQuery] = useState("");
   const [playlistName, setPlaylistName] = useState("");
+  const [appVersion, setAppVersion] = useState("0.0.0");
 
   async function refresh() {
     const [media, savedPlaylists, jobs] = await Promise.all([
@@ -34,6 +40,10 @@ export function App() {
 
   useEffect(() => {
     void refresh();
+  }, []);
+
+  useEffect(() => {
+    void window.zentube.getVersion().then(setAppVersion);
   }, []);
 
   const filteredMedia = useMemo(() => {
@@ -125,24 +135,7 @@ export function App() {
                   </button>
                 </div>
               ) : (
-                <div className="media-list">
-                  {filteredMedia.map((item) => (
-                    <button
-                      className={selected?.id === item.id ? "media-row selected" : "media-row"}
-                      key={item.id}
-                      onClick={() => setSelected(item)}
-                      type="button"
-                    >
-                      <div className="thumb">
-                        <Play size={18} />
-                      </div>
-                      <div>
-                        <strong>{item.title}</strong>
-                        <span>{formatBytes(item.fileSizeBytes)} · {item.filePath}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                <LibraryGrid items={filteredMedia} onSelect={setSelected} selectedId={selected?.id ?? null} />
               )}
             </div>
           )}
@@ -196,42 +189,13 @@ export function App() {
             </div>
           )}
 
-          {view === "settings" && (
-            <div className="panel">
-              <div className="panel-header">
-                <div>
-                  <h1>Settings</h1>
-                  <p>Provider and storage settings will live here.</p>
-                </div>
-              </div>
-              <div className="notice">
-                Zentube starts as a local media library. External source providers should only be
-                enabled for content you own or are authorized to store offline.
-              </div>
-            </div>
-          )}
+          {view === "downloads" && <DownloadsView onLibraryChanged={refresh} />}
+
+          {view === "settings" && <SettingsView version={appVersion} />}
         </section>
 
-        <footer className="player">
-          <div>
-            <strong>{selected?.title ?? "Nothing selected"}</strong>
-            <span>{selected?.filePath ?? "Import a file to test local playback."}</span>
-          </div>
-          {selected ? <video controls src={`local-file://${selected.filePath}`} /> : null}
-        </footer>
+        <PlayerOverlay item={selected} onClose={() => setSelected(null)} />
       </main>
     </div>
   );
-}
-
-function formatBytes(bytes: number | null) {
-  if (!bytes) return "Unknown size";
-  const units = ["B", "KB", "MB", "GB"];
-  let value = bytes;
-  let unit = 0;
-  while (value >= 1024 && unit < units.length - 1) {
-    value /= 1024;
-    unit += 1;
-  }
-  return `${value.toFixed(unit === 0 ? 0 : 1)} ${units[unit]}`;
 }

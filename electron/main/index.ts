@@ -1,7 +1,9 @@
 import { app, BrowserWindow, protocol } from "electron";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { killAllDownloads } from "../services/downloads/downloadManager.js";
 import { initializeDatabase } from "../services/db/client.js";
+import { backfillThumbnails } from "../services/library/libraryService.js";
 import { registerIpcHandlers } from "./ipc.js";
 
 const isDev = Boolean(process.env.VITE_DEV_SERVER_URL);
@@ -51,6 +53,7 @@ app.whenReady().then(() => {
   });
 
   initializeDatabase(app.getPath("userData"));
+  backfillThumbnails();
   registerIpcHandlers();
   createWindow();
 
@@ -65,4 +68,8 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
+});
+
+app.on("before-quit", () => {
+  killAllDownloads();
 });
