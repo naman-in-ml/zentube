@@ -36,6 +36,17 @@ function createWindow() {
     }
   });
 
+  if (process.env.ZENTUBE_DEBUG_RENDERER) {
+    window.webContents.on("console-message", (_event, level, message) => {
+      console.log(`[renderer:${level}] ${message}`);
+    });
+    window.webContents.on("did-finish-load", () => {
+      void window.webContents.executeJavaScript(
+        `JSON.stringify({ title: document.title, rootChildren: document.getElementById("root")?.childElementCount ?? -1, text: document.body.innerText.slice(0, 200) })`
+      ).then((dump) => console.log(`[renderer-dump] ${dump}`));
+    });
+  }
+
   if (isDev) {
     void window.loadURL(process.env.VITE_DEV_SERVER_URL!);
     window.webContents.openDevTools({ mode: "detach" });

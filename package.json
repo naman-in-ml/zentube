@@ -1,6 +1,6 @@
 {
   "name": "zentube",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Local-first desktop playlist and media library manager.",
   "main": "dist-electron/main/index.js",
