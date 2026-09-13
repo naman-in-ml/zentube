@@ -1,6 +1,9 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import { autoUpdater } from "electron-updater";
 
+const FRIENDLY_ERROR =
+  "Couldn't reach GitHub releases — check your internet connection and update token.";
+
 export type UpdateStatus =
   | { state: "not-packaged" }
   | { state: "checking" }
@@ -15,6 +18,8 @@ function broadcast(status: UpdateStatus) {
     window.webContents.send("updates:status", status);
   }
 }
+
+let lastError: string | null = null;
 
 let downloadedVersion: string | null = null;
 
@@ -38,9 +43,12 @@ autoUpdater.on("update-downloaded", (info) => {
   downloadedVersion = info.version;
   broadcast({ state: "update-downloaded", version: info.version });
 });
-autoUpdater.on("error", (error) =>
-  broadcast({ state: "error", message: error.message ?? String(error) })
-);
+autoUpdater.on("error", (error) => {
+  const message = error.message ?? String(error);
+  lastError = message;
+  console.error("Update check failed:", message);
+  broadcast({ state: "error", message: FRIENDLY_ERROR });
+});
 
 export function registerUpdateIpcHandlers() {
   ipcMain.handle("updates:check", () => {

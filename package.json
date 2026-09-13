@@ -1,6 +1,6 @@
 {
   "name": "zentube",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Local-first desktop playlist and media library manager.",
   "main": "dist-electron/main/index.js",
@@ -45,7 +45,8 @@
     "publish": {
       "provider": "github",
       "owner": "naman-in-ml",
-      "repo": "zentube"
+      "repo": "zentube",
+      "private": true
     },
     "directories": {
       "output": "release"
