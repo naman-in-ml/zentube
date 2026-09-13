@@ -11,22 +11,59 @@ export type MediaItem = {
   durationSeconds: number | null;
   thumbnailPath: string | null;
   addedAt: string;
+  progressPercent: number | null;
 };
 
 const SELECT_COLUMNS = `
-  id,
-  title,
-  file_path AS filePath,
-  file_size_bytes AS fileSizeBytes,
-  duration_seconds AS durationSeconds,
-  thumbnail_path AS thumbnailPath,
-  added_at AS addedAt
+  media.id,
+  media.title,
+  media.file_path AS filePath,
+  media.file_size_bytes AS fileSizeBytes,
+  media.duration_seconds AS durationSeconds,
+  media.thumbnail_path AS thumbnailPath,
+  media.added_at AS addedAt,
+  progress.position_seconds AS progressPosition,
+  progress.completed AS progressCompleted
 `;
 
+type LibraryRow = {
+  id: string;
+  title: string;
+  filePath: string;
+  fileSizeBytes: number | null;
+  durationSeconds: number | null;
+  thumbnailPath: string | null;
+  addedAt: string;
+  progressPosition: number | null;
+  progressCompleted: number | null;
+};
+
+function toMediaItem(row: LibraryRow): MediaItem {
+  const { progressPosition, progressCompleted, ...media } = row;
+
+  let progressPercent: number | null = null;
+  if (progressCompleted) {
+    progressPercent = 100;
+  } else if (media.durationSeconds && progressPosition && progressPosition > 0) {
+    progressPercent = Math.min(
+      99,
+      Math.round((progressPosition / media.durationSeconds) * 100)
+    );
+  }
+
+  return { ...media, progressPercent };
+}
+
 export function listMediaItems(): MediaItem[] {
-  return getDatabase()
-    .prepare(`SELECT ${SELECT_COLUMNS} FROM media_items ORDER BY added_at DESC`)
-    .all() as MediaItem[];
+  const rows = getDatabase()
+    .prepare(
+      `SELECT ${SELECT_COLUMNS}
+       FROM media_items AS media
+       LEFT JOIN watch_progress AS progress ON progress.media_id = media.id
+       ORDER BY media.added_at DESC`
+    )
+    .all() as LibraryRow[];
+  return rows.map(toMediaItem);
 }
 
 export function addMediaItem(
@@ -37,11 +74,16 @@ export function addMediaItem(
   const stat = fs.statSync(filePath);
   const title = options?.title?.trim() || path.basename(filePath, path.extname(filePath));
   const existing = getDatabase()
-    .prepare(`SELECT ${SELECT_COLUMNS} FROM media_items WHERE file_path = ?`)
-    .get(filePath) as MediaItem | undefined;
+    .prepare(
+      `SELECT ${SELECT_COLUMNS}
+       FROM media_items AS media
+       LEFT JOIN watch_progress AS progress ON progress.media_id = media.id
+       WHERE media.file_path = ?`
+    )
+    .get(filePath) as LibraryRow | undefined;
 
   if (existing) {
-    return existing;
+    return toMediaItem(existing);
   }
 
   const media: MediaItem = {
@@ -51,7 +93,8 @@ export function addMediaItem(
     fileSizeBytes: stat.size,
     durationSeconds: options?.durationSeconds ?? null,
     thumbnailPath: findSiblingThumbnail(filePath),
-    addedAt: now
+    addedAt: now,
+    progressPercent: null
   };
 
   getDatabase()

@@ -10,6 +10,7 @@ import {
 import { checkTools, resolveUrl } from "../services/downloads/ytdlp.js";
 import { addMediaItem, listMediaItems } from "../services/library/libraryService.js";
 import { createPlaylist, listPlaylists } from "../services/playlists/playlistService.js";
+import { getProgress, updateProgress } from "../services/progress/progressService.js";
 import { createQueueJob, listQueueJobs } from "../services/queue/queueService.js";
 import { registerUpdateIpcHandlers } from "../services/updates/updaterService.js";
 
@@ -78,6 +79,28 @@ export function registerIpcHandlers() {
   ipcMain.handle("playlists:create", (_event, input: unknown) => {
     const payload = createPlaylistSchema.parse(input);
     return createPlaylist(payload);
+  });
+
+  const mediaIdSchema = z.object({ mediaId: z.string().uuid() });
+
+  ipcMain.handle("progress:get", (_event, raw: unknown) => {
+    const { mediaId } = mediaIdSchema.parse(raw);
+    return getProgress(mediaId);
+  });
+
+  ipcMain.handle("progress:update", (_event, raw: unknown) => {
+    const input = z
+      .object({
+        mediaId: z.string().uuid(),
+        position: z.number().finite().min(0),
+        duration: z.number().finite().positive().nullable().optional()
+      })
+      .parse(raw);
+    return updateProgress({
+      mediaId: input.mediaId,
+      position: input.position,
+      duration: input.duration ?? null
+    });
   });
 
   ipcMain.handle("queue:list", () => listQueueJobs());

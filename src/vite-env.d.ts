@@ -8,6 +8,14 @@ type MediaItem = {
   durationSeconds: number | null;
   thumbnailPath: string | null;
   addedAt: string;
+  progressPercent: number | null;
+};
+
+type WatchProgress = {
+  mediaId: string;
+  positionSeconds: number;
+  completed: boolean;
+  updatedAt: string;
 };
 
 type Playlist = {
@@ -81,6 +89,10 @@ interface Window {
     };
     queue: {
       list: () => Promise<QueueJob[]>;
+    };
+    progress: {
+      get: (mediaId: string) => Promise<WatchProgress | null>;
+      update: (input: { mediaId: string; position: number; duration: number | null }) => Promise<WatchProgress>;
     };
     downloads: {
       checkTools: () => Promise<{ ytDlp: boolean; ytDlpVersion: string | null; ffmpeg: boolean }>;

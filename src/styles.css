@@ -799,6 +799,22 @@ h1 {
   letter-spacing: 0.02em;
 }
 
+.yt-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.yt-progress span {
+  display: block;
+  height: 100%;
+  background: #e72145;
+  border-radius: 0 2px 2px 0;
+}
+
 .yt-hover-play {
   display: grid;
   position: absolute;

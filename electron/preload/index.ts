@@ -14,6 +14,11 @@ contextBridge.exposeInMainWorld("zentube", {
   queue: {
     list: () => ipcRenderer.invoke("queue:list")
   },
+  progress: {
+    get: (mediaId: string) => ipcRenderer.invoke("progress:get", { mediaId }),
+    update: (input: { mediaId: string; position: number; duration: number | null }) =>
+      ipcRenderer.invoke("progress:update", input)
+  },
   downloads: {
     checkTools: () => ipcRenderer.invoke("downloads:checkTools"),
     resolve: (url: string) => ipcRenderer.invoke("downloads:resolve", { url }),

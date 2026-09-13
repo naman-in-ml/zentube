@@ -29,6 +29,11 @@ export function LibraryGrid({ items, selectedId, onSelect }: Props) {
                 </div>
               )}
               {duration && <span className="yt-duration">{duration}</span>}
+              {item.progressPercent !== null && (
+                <span className="yt-progress">
+                  <span style={{ width: `${item.progressPercent}%` }} />
+                </span>
+              )}
               <div className="yt-hover-play">
                 <Play size={20} fill="currentColor" />
               </div>
