@@ -8,8 +8,22 @@ import {
   startDownloads
 } from "../services/downloads/downloadManager.js";
 import { checkTools, resolveUrl } from "../services/downloads/ytdlp.js";
+import {
+  clearWatchHistory,
+  deleteHistoryItem,
+  listWatchHistory,
+  logWatchSession
+} from "../services/history/historyService.js";
 import { addMediaItem, listMediaItems } from "../services/library/libraryService.js";
-import { createPlaylist, listPlaylists } from "../services/playlists/playlistService.js";
+import {
+  addItemToPlaylist,
+  createPlaylist,
+  deletePlaylist,
+  getPlaylistDetails,
+  listPlaylists,
+  listPlaylistsWithSummary,
+  removeItemFromPlaylist
+} from "../services/playlists/playlistService.js";
 import { getProgress, updateProgress } from "../services/progress/progressService.js";
 import { createQueueJob, listQueueJobs } from "../services/queue/queueService.js";
 import { registerUpdateIpcHandlers } from "../services/updates/updaterService.js";
@@ -35,7 +49,7 @@ const startDownloadSchema = z.object({
     )
     .min(1)
     .max(5000),
-  quality: z.enum(["best", "1080", "720", "480"]),
+  quality: z.enum(["best", "1080", "720", "480", "audio"]),
   playlistTitle: z.string().max(200).nullable().optional()
 });
 
@@ -76,9 +90,38 @@ export function registerIpcHandlers() {
 
   ipcMain.handle("playlists:list", () => listPlaylists());
 
+  ipcMain.handle("playlists:listWithSummary", () => listPlaylistsWithSummary());
+
+  ipcMain.handle("playlists:getDetails", (_event, raw: unknown) => {
+    const { playlistId } = z.object({ playlistId: z.string().uuid() }).parse(raw);
+    return getPlaylistDetails(playlistId);
+  });
+
   ipcMain.handle("playlists:create", (_event, input: unknown) => {
     const payload = createPlaylistSchema.parse(input);
     return createPlaylist(payload);
+  });
+
+  ipcMain.handle("playlists:delete", (_event, raw: unknown) => {
+    const { playlistId } = z.object({ playlistId: z.string().uuid() }).parse(raw);
+    deletePlaylist(playlistId);
+    return true;
+  });
+
+  ipcMain.handle("playlists:addItem", (_event, raw: unknown) => {
+    const { playlistId, mediaId } = z
+      .object({ playlistId: z.string().uuid(), mediaId: z.string().uuid() })
+      .parse(raw);
+    addItemToPlaylist(playlistId, mediaId);
+    return true;
+  });
+
+  ipcMain.handle("playlists:removeItem", (_event, raw: unknown) => {
+    const { playlistId, mediaId } = z
+      .object({ playlistId: z.string().uuid(), mediaId: z.string().uuid() })
+      .parse(raw);
+    removeItemFromPlaylist(playlistId, mediaId);
+    return true;
   });
 
   const mediaIdSchema = z.object({ mediaId: z.string().uuid() });
@@ -101,6 +144,37 @@ export function registerIpcHandlers() {
       position: input.position,
       duration: input.duration ?? null
     });
+  });
+
+  ipcMain.handle("history:log", (_event, raw: unknown) => {
+    const input = z
+      .object({
+        mediaId: z.string().uuid(),
+        startedAt: z.string(),
+        stoppedAt: z.string(),
+        startPosition: z.number().finite().min(0),
+        stopPosition: z.number().finite().min(0),
+        duration: z.number().finite().positive().nullable().optional(),
+        completed: z.boolean().optional()
+      })
+      .parse(raw);
+    return logWatchSession(input);
+  });
+
+  ipcMain.handle("history:list", (_event, raw: unknown) => {
+    const limit = typeof raw === "number" && raw > 0 ? raw : 100;
+    return listWatchHistory(limit);
+  });
+
+  ipcMain.handle("history:clear", () => {
+    clearWatchHistory();
+    return true;
+  });
+
+  ipcMain.handle("history:delete", (_event, raw: unknown) => {
+    const { id } = z.object({ id: z.string().uuid() }).parse(raw);
+    deleteHistoryItem(id);
+    return true;
   });
 
   ipcMain.handle("queue:list", () => listQueueJobs());

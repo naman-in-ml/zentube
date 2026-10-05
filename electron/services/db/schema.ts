@@ -56,6 +56,19 @@ CREATE TABLE IF NOT EXISTS queue_jobs (
   updated_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS watch_history (
+  id TEXT PRIMARY KEY,
+  media_id TEXT NOT NULL,
+  started_at TEXT NOT NULL,
+  stopped_at TEXT NOT NULL,
+  start_position_seconds REAL NOT NULL,
+  stop_position_seconds REAL NOT NULL,
+  duration_seconds REAL,
+  completed INTEGER NOT NULL DEFAULT 0,
+  FOREIGN KEY (media_id) REFERENCES media_items(id) ON DELETE CASCADE
+);
+
 CREATE INDEX IF NOT EXISTS idx_media_title ON media_items(title);
 CREATE INDEX IF NOT EXISTS idx_queue_status ON queue_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_history_stopped ON watch_history(stopped_at);
 `;

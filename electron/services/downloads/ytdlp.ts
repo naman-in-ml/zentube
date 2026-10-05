@@ -3,9 +3,7 @@ import { mkdirSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-export type QualityPreset = "best" | "1080" | "720" | "480";
-
-export const QUALITY_PRESETS: QualityPreset[] = ["best", "1080", "720", "480"];
+export type QualityPreset = "best" | "1080" | "720" | "480" | "audio";
 
 export type ResolvedEntry = {
   id: string;
@@ -37,6 +35,8 @@ const MEDIA_EXTENSIONS = new Set([
 
 export function formatSelector(quality: QualityPreset): string {
   switch (quality) {
+    case "audio":
+      return "ba/b";
     case "1080":
       return "bv*[height<=1080]+ba/b";
     case "720":

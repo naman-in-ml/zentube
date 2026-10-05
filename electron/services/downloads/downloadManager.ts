@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { addMediaItem } from "../library/libraryService.js";
+import { addItemToPlaylist, getOrCreatePlaylist } from "../playlists/playlistService.js";
 import { createQueueJob } from "../queue/queueService.js";
 import {
   ARCHIVE_FILE,
@@ -213,7 +214,14 @@ function runNext() {
       if (job.outputPath) {
         try {
           const metadata = readDownloadMetadata(job.outputPath);
-          const media = addMediaItem(job.outputPath, metadata);
+          const media = addMediaItem(job.outputPath, {
+            ...metadata,
+            sourceUrl: job.url
+          });
+          if (job.playlistTitle) {
+            const playlist = getOrCreatePlaylist(job.playlistTitle);
+            addItemToPlaylist(playlist.id, media.id);
+          }
           createQueueJob({
             id: randomUUID(),
             type: "yt-download",

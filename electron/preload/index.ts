@@ -8,8 +8,29 @@ contextBridge.exposeInMainWorld("zentube", {
   },
   playlists: {
     list: () => ipcRenderer.invoke("playlists:list"),
+    listWithSummary: () => ipcRenderer.invoke("playlists:listWithSummary"),
+    getDetails: (playlistId: string) => ipcRenderer.invoke("playlists:getDetails", { playlistId }),
     create: (input: { name: string; description?: string }) =>
-      ipcRenderer.invoke("playlists:create", input)
+      ipcRenderer.invoke("playlists:create", input),
+    delete: (playlistId: string) => ipcRenderer.invoke("playlists:delete", { playlistId }),
+    addItem: (playlistId: string, mediaId: string) =>
+      ipcRenderer.invoke("playlists:addItem", { playlistId, mediaId }),
+    removeItem: (playlistId: string, mediaId: string) =>
+      ipcRenderer.invoke("playlists:removeItem", { playlistId, mediaId })
+  },
+  history: {
+    log: (input: {
+      mediaId: string;
+      startedAt: string;
+      stoppedAt: string;
+      startPosition: number;
+      stopPosition: number;
+      duration?: number | null;
+      completed?: boolean;
+    }) => ipcRenderer.invoke("history:log", input),
+    list: (limit?: number) => ipcRenderer.invoke("history:list", limit),
+    clear: () => ipcRenderer.invoke("history:clear"),
+    delete: (id: string) => ipcRenderer.invoke("history:delete", { id })
   },
   queue: {
     list: () => ipcRenderer.invoke("queue:list")

@@ -68,7 +68,7 @@ export function listMediaItems(): MediaItem[] {
 
 export function addMediaItem(
   filePath: string,
-  options?: { durationSeconds?: number | null; title?: string | null }
+  options?: { durationSeconds?: number | null; title?: string | null; sourceUrl?: string | null }
 ): MediaItem {
   const now = new Date().toISOString();
   const stat = fs.statSync(filePath);
@@ -100,11 +100,14 @@ export function addMediaItem(
   getDatabase()
     .prepare(
       `INSERT INTO media_items
-         (id, title, file_path, file_size_bytes, duration_seconds, thumbnail_path, added_at, updated_at)
+         (id, title, source_url, file_path, file_size_bytes, duration_seconds, thumbnail_path, added_at, updated_at)
        VALUES
-         (@id, @title, @filePath, @fileSizeBytes, @durationSeconds, @thumbnailPath, @addedAt, @addedAt)`
+         (@id, @title, @sourceUrl, @filePath, @fileSizeBytes, @durationSeconds, @thumbnailPath, @addedAt, @addedAt)`
     )
-    .run(media);
+    .run({
+      ...media,
+      sourceUrl: options?.sourceUrl ?? null
+    });
 
   return media;
 }

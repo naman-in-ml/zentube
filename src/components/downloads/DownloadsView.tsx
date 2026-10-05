@@ -1,11 +1,13 @@
 import { Check, Download, Link2, Loader2, Square, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { formatDuration } from "../../lib/format";
 
 const QUALITY_OPTIONS: Array<{ value: DownloadQuality; label: string }> = [
-  { value: "best", label: "Best available" },
-  { value: "1080", label: "1080p" },
-  { value: "720", label: "720p" },
-  { value: "480", label: "480p" }
+  { value: "best", label: "Best available (Video + Audio)" },
+  { value: "1080", label: "1080p (Full HD)" },
+  { value: "720", label: "720p (HD)" },
+  { value: "480", label: "480p (Standard)" },
+  { value: "audio", label: "Audio only (MP3/M4A)" }
 ];
 
 type Props = {
@@ -193,10 +195,17 @@ export function DownloadsView({ onLibraryChanged }: Props) {
       {resolved && (
         <div className="dl-resolved">
           <div className="dl-resolved-header">
-            <strong>
-              {resolved.isPlaylist ? (resolved.title ?? "Playlist") : resolved.title ?? "Video"} · {resolved.entries.length} item
-              {resolved.entries.length === 1 ? "" : "s"}
-            </strong>
+            <div>
+              <strong>
+                {resolved.isPlaylist ? (resolved.title ?? "Playlist") : resolved.title ?? "Video"} · {resolved.entries.length} item
+                {resolved.entries.length === 1 ? "" : "s"}
+              </strong>
+              {resolved.isPlaylist && (
+                <span className="dl-playlist-badge">
+                  Will be automatically organized into Course / Playlist: &ldquo;{resolved.title || "Course"}&rdquo;
+                </span>
+              )}
+            </div>
             <div className="dl-resolved-actions">
               <button className="secondary-button" onClick={toggleAll} type="button">
                 {allSelected ? <X size={15} /> : <Check size={15} />}
@@ -313,16 +322,6 @@ function DownloadRow({ job, onCancel }: { job: DownloadJob; onCancel?: () => voi
       )}
     </div>
   );
-}
-
-function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = Math.floor(seconds % 60);
-  if (hours > 0) {
-    return `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-  }
-  return `${minutes}:${String(secs).padStart(2, "0")}`;
 }
 
 function errorMessage(issue: unknown): string {
