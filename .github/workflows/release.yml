@@ -37,3 +37,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run release
+
+      - name: Publish release (undraft)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="v$(node -p 'require("./package.json").version')"
+          echo "Publishing release $VERSION..."
+          gh release edit "$VERSION" --draft=false --latest || true
