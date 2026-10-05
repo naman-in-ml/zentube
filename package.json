@@ -15,7 +15,7 @@
     "dist": "npm run build && electron-builder",
     "release": "npm run build && electron-builder --publish always",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.electron.json",
-    "test:smoke": "npm run build:electron && electron scripts/progress-smoke.mjs",
+    "test:smoke": "npm run build:electron && electron --no-sandbox scripts/progress-smoke.mjs",
     "test": "npm run typecheck && npm run test:smoke",
     "postinstall": "electron-builder install-app-deps"
   },
