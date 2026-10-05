@@ -14,7 +14,11 @@ import {
   listWatchHistory,
   logWatchSession
 } from "../services/history/historyService.js";
-import { addMediaItem, listMediaItems } from "../services/library/libraryService.js";
+import {
+  addMediaItem,
+  deleteMediaItem,
+  listMediaItems
+} from "../services/library/libraryService.js";
 import {
   addItemToPlaylist,
   createPlaylist,
@@ -57,6 +61,13 @@ export function registerIpcHandlers() {
   ipcMain.handle("app:getVersion", () => app.getVersion());
 
   ipcMain.handle("library:list", () => listMediaItems());
+
+  ipcMain.handle("library:delete", (_event, raw: unknown) => {
+    const { id, deleteFileFromDisk } = z
+      .object({ id: z.string().uuid(), deleteFileFromDisk: z.boolean().optional() })
+      .parse(raw);
+    return deleteMediaItem(id, deleteFileFromDisk ?? true);
+  });
 
   ipcMain.handle("library:importFiles", async () => {
     const result = await dialog.showOpenDialog({
@@ -176,8 +187,6 @@ export function registerIpcHandlers() {
     deleteHistoryItem(id);
     return true;
   });
-
-  ipcMain.handle("queue:list", () => listQueueJobs());
 
   ipcMain.handle("downloads:checkTools", () => checkTools());
 

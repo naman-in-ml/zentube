@@ -4,6 +4,8 @@ contextBridge.exposeInMainWorld("zentube", {
   getVersion: () => ipcRenderer.invoke("app:getVersion"),
   library: {
     list: () => ipcRenderer.invoke("library:list"),
+    delete: (id: string, deleteFileFromDisk = true) =>
+      ipcRenderer.invoke("library:delete", { id, deleteFileFromDisk }),
     importFiles: () => ipcRenderer.invoke("library:importFiles")
   },
   playlists: {
@@ -31,9 +33,6 @@ contextBridge.exposeInMainWorld("zentube", {
     list: (limit?: number) => ipcRenderer.invoke("history:list", limit),
     clear: () => ipcRenderer.invoke("history:clear"),
     delete: (id: string) => ipcRenderer.invoke("history:delete", { id })
-  },
-  queue: {
-    list: () => ipcRenderer.invoke("queue:list")
   },
   progress: {
     get: (mediaId: string) => ipcRenderer.invoke("progress:get", { mediaId }),

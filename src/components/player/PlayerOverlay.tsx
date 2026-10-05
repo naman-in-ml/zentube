@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { formatBytes, formatDuration } from "../../lib/format";
 
@@ -6,9 +6,10 @@ type Props = {
   item: MediaItem | null;
   initialSeek?: number | null;
   onClose: () => void;
+  onDelete?: (item: MediaItem) => void;
 };
 
-export function PlayerOverlay({ item, initialSeek, onClose }: Props) {
+export function PlayerOverlay({ item, initialSeek, onClose, onDelete }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const itemRef = useRef<MediaItem | null>(null);
   const lastSavedBucket = useRef(-1);
@@ -175,9 +176,25 @@ export function PlayerOverlay({ item, initialSeek, onClose }: Props) {
               {duration ? ` · ${duration}` : ""}
             </span>
           </div>
-          <button className="player-close" onClick={onClose} title="Close player" type="button">
-            <X size={20} />
-          </button>
+          <div className="player-header-actions">
+            {onDelete && (
+              <button
+                className="player-delete"
+                onClick={() => {
+                  if (window.confirm(`Delete "${item.title}"?`)) {
+                    onDelete(item);
+                  }
+                }}
+                title="Delete video"
+                type="button"
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
+            <button className="player-close" onClick={onClose} title="Close player" type="button">
+              <X size={20} />
+            </button>
+          </div>
         </header>
         <video autoPlay controls ref={videoRef} src={`local-file://${item.filePath}`} />
         <p className="player-path">{item.filePath}</p>

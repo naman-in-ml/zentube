@@ -1,5 +1,4 @@
 import {
-  Clock3,
   Download,
   Film,
   FolderPlus,
@@ -16,34 +15,27 @@ import { PlayerOverlay } from "./components/player/PlayerOverlay";
 import { PlaylistsView } from "./components/playlists/PlaylistsView";
 import { SettingsView } from "./components/settings/SettingsView";
 
-type View = "library" | "playlists" | "history" | "downloads" | "queue" | "settings";
+type View = "library" | "playlists" | "history" | "downloads" | "settings";
 
 const navItems: Array<{ id: View; label: string; icon: typeof Film }> = [
   { id: "library", label: "Library", icon: Film },
   { id: "playlists", label: "Courses & Playlists", icon: ListMusic },
   { id: "history", label: "Watch History", icon: History },
   { id: "downloads", label: "Downloads", icon: Download },
-  { id: "queue", label: "Queue", icon: Clock3 },
   { id: "settings", label: "Settings", icon: Settings }
 ];
 
 export function App() {
   const [view, setView] = useState<View>("library");
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
-  const [queueJobs, setQueueJobs] = useState<QueueJob[]>([]);
   const [selected, setSelected] = useState<MediaItem | null>(null);
   const [initialSeek, setInitialSeek] = useState<number | null>(null);
   const [query, setQuery] = useState("");
   const [appVersion, setAppVersion] = useState("0.0.0");
 
   async function refresh() {
-    const [media, jobs] = await Promise.all([
-      window.zentube.library.list(),
-      window.zentube.queue.list()
-    ]);
-
+    const media = await window.zentube.library.list();
     setMediaItems(media);
-    setQueueJobs(jobs);
     setSelected((current) => (current ? media.find((item) => item.id === current.id) ?? null : null));
   }
 
@@ -78,6 +70,15 @@ export function App() {
     setSelected(null);
     setInitialSeek(null);
     void refresh();
+  }
+
+  async function handleDeleteMedia(item: MediaItem) {
+    if (selected?.id === item.id) {
+      setSelected(null);
+      setInitialSeek(null);
+    }
+    await window.zentube.library.delete(item.id, true);
+    await refresh();
   }
 
   return (
@@ -173,6 +174,7 @@ export function App() {
               ) : (
                 <LibraryGrid
                   items={filteredMedia}
+                  onDelete={handleDeleteMedia}
                   onSelect={(item) => playMedia(item)}
                   selectedId={selected?.id ?? null}
                 />
@@ -188,31 +190,15 @@ export function App() {
 
           {view === "downloads" && <DownloadsView onLibraryChanged={refresh} />}
 
-          {view === "queue" && (
-            <div className="panel">
-              <div className="panel-header">
-                <div>
-                  <h1>Queue</h1>
-                  <p>Import and download task history.</p>
-                </div>
-              </div>
-              <div className="simple-list">
-                {queueJobs.map((job) => (
-                  <div className="simple-row" key={job.id}>
-                    <strong>{job.type}</strong>
-                    <span>
-                      {job.status} · {job.input}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {view === "settings" && <SettingsView version={appVersion} />}
         </section>
 
-        <PlayerOverlay item={selected} initialSeek={initialSeek} onClose={closePlayer} />
+        <PlayerOverlay
+          initialSeek={initialSeek}
+          item={selected}
+          onClose={closePlayer}
+          onDelete={handleDeleteMedia}
+        />
       </main>
     </div>
   );

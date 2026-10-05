@@ -69,16 +69,6 @@ type PlaylistDetails = {
   items: PlaylistItem[];
 };
 
-type QueueJob = {
-  id: string;
-  type: string;
-  status: string;
-  input: string;
-  outputMediaId?: string;
-  progress: number;
-  createdAt: string;
-};
-
 type DownloadEntry = {
   id: string;
   title: string;
@@ -125,6 +115,7 @@ interface Window {
     getVersion: () => Promise<string>;
     library: {
       list: () => Promise<MediaItem[]>;
+      delete: (id: string, deleteFileFromDisk?: boolean) => Promise<boolean>;
       importFiles: () => Promise<MediaItem[]>;
     };
     playlists: {
@@ -149,9 +140,6 @@ interface Window {
       list: (limit?: number) => Promise<WatchHistoryEntry[]>;
       clear: () => Promise<boolean>;
       delete: (id: string) => Promise<boolean>;
-    };
-    queue: {
-      list: () => Promise<QueueJob[]>;
     };
     progress: {
       get: (mediaId: string) => Promise<WatchProgress | null>;

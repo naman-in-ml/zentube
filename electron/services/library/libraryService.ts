@@ -147,3 +147,41 @@ export function backfillThumbnails(): number {
 
   return updated;
 }
+
+export function deleteMediaItem(id: string, deleteFileFromDisk = true): boolean {
+  const db = getDatabase();
+  const item = db
+    .prepare(`SELECT file_path AS filePath, thumbnail_path AS thumbnailPath FROM media_items WHERE id = ?`)
+    .get(id) as { filePath: string; thumbnailPath: string | null } | undefined;
+
+  if (!item) {
+    return false;
+  }
+
+  // Delete from SQLite (cascades automatically to watch_progress, playlist_items, and watch_history)
+  db.prepare(`DELETE FROM media_items WHERE id = ?`).run(id);
+
+  if (deleteFileFromDisk) {
+    try {
+      if (fs.existsSync(item.filePath)) {
+        fs.unlinkSync(item.filePath);
+      }
+      if (item.thumbnailPath && fs.existsSync(item.thumbnailPath)) {
+        fs.unlinkSync(item.thumbnailPath);
+      }
+      const base = item.filePath.slice(0, -path.extname(item.filePath).length);
+      const infoPath = `${base}.info.json`;
+      if (fs.existsSync(infoPath)) {
+        fs.unlinkSync(infoPath);
+      }
+      const vttPath = `${base}.en.vtt`;
+      if (fs.existsSync(vttPath)) {
+        fs.unlinkSync(vttPath);
+      }
+    } catch (err) {
+      console.warn("Could not delete some media files from disk:", err);
+    }
+  }
+
+  return true;
+}

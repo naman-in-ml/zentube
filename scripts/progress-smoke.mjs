@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { app } from "electron";
 import { initializeDatabase } from "../dist-electron/services/db/client.js";
-import { addMediaItem, listMediaItems } from "../dist-electron/services/library/libraryService.js";
+import { addMediaItem, deleteMediaItem, listMediaItems } from "../dist-electron/services/library/libraryService.js";
 import { getProgress, updateProgress } from "../dist-electron/services/progress/progressService.js";
 import {
   clearWatchHistory,
@@ -100,6 +100,10 @@ assert("playlist item has title and position", details.items[0].title === "Learn
 
 const summaries = listPlaylistsWithSummary();
 assert("listPlaylistsWithSummary returns course with counts", summaries.length >= 1 && summaries[0].itemCount === 1);
+
+deleteMediaItem(media.id, false);
+assert("deleteMediaItem removes item from media list", listMediaItems().length === 0);
+assert("deleteMediaItem cascades to playlist items", getPlaylistDetails(playlist.id).items.length === 0);
 
 console.log("userData:", app.getPath("userData"));
 app.exit(process.exitCode ?? 0);
