@@ -1,4 +1,6 @@
-import { app, BrowserWindow, protocol } from "electron";
+import { app, BrowserWindow, net, protocol } from "electron";
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { killAllDownloads } from "../services/downloads/downloadManager.js";
@@ -15,7 +17,8 @@ protocol.registerSchemesAsPrivileged([
       standard: true,
       secure: true,
       stream: true,
-      supportFetchAPI: true
+      supportFetchAPI: true,
+      bypassCSP: true
     }
   }
 ]);
@@ -27,7 +30,7 @@ function createWindow() {
     minWidth: 980,
     minHeight: 640,
     title: "Zentube",
-    backgroundColor: "#f5f3ef",
+    backgroundColor: "#0f0f0f",
     webPreferences: {
       preload: path.join(__dirname, "../preload/index.js"),
       contextIsolation: true,
@@ -58,9 +61,39 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  protocol.registerFileProtocol("local-file", (request, callback) => {
-    const filePath = decodeURIComponent(request.url.replace("local-file://", ""));
-    callback({ path: filePath });
+  protocol.handle("local-file", (request) => {
+    try {
+      let raw = decodeURIComponent(request.url.slice("local-file://".length));
+      const qIndex = raw.indexOf("?");
+      if (qIndex !== -1) raw = raw.slice(0, qIndex);
+      const hashIndex = raw.indexOf("#");
+      if (hashIndex !== -1) raw = raw.slice(0, hashIndex);
+
+      if (!raw.startsWith("/") && process.platform !== "win32") {
+        raw = "/" + raw;
+      }
+
+      // Auto-heal path if file moved between ~/Zentube and ~/Pictures/Zentube
+      if (!fs.existsSync(raw)) {
+        const home = os.homedir();
+        if (raw.startsWith(path.join(home, "Zentube"))) {
+          const alternate = raw.replace(path.join(home, "Zentube"), path.join(home, "Pictures/Zentube"));
+          if (fs.existsSync(alternate)) {
+            raw = alternate;
+          }
+        } else if (raw.startsWith(path.join(home, "Pictures/Zentube"))) {
+          const alternate = raw.replace(path.join(home, "Pictures/Zentube"), path.join(home, "Zentube"));
+          if (fs.existsSync(alternate)) {
+            raw = alternate;
+          }
+        }
+      }
+
+      return net.fetch(pathToFileURL(raw).toString());
+    } catch (err) {
+      console.error("local-file protocol error:", err);
+      return new Response("Not found", { status: 404 });
+    }
   });
 
   initializeDatabase(app.getPath("userData"));
