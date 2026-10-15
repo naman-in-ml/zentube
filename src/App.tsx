@@ -3,7 +3,8 @@ import {
   Film,
   FolderPlus,
   History,
-  ListMusic,
+  ListVideo,
+  Play,
   Search,
   Settings
 } from "lucide-react";
@@ -19,7 +20,7 @@ type View = "library" | "playlists" | "history" | "downloads" | "settings";
 
 const navItems: Array<{ id: View; label: string; icon: typeof Film }> = [
   { id: "library", label: "Library", icon: Film },
-  { id: "playlists", label: "Courses & Playlists", icon: ListMusic },
+  { id: "playlists", label: "Playlists & Courses", icon: ListVideo },
   { id: "history", label: "Watch History", icon: History },
   { id: "downloads", label: "Downloads", icon: Download },
   { id: "settings", label: "Settings", icon: Settings }
@@ -85,10 +86,14 @@ export function App() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark">Z</div>
-          <div>
-            <strong>Zentube</strong>
-            <span>Learning Media OS</span>
+          <div className="brand-mark yt-mark">
+            <Play fill="#ffffff" size={17} />
+          </div>
+          <div className="brand-info">
+            <strong className="brand-title">
+              Zen<span className="brand-tube">Tube</span>
+            </strong>
+            <span className="brand-subtitle">Offline Learning OS</span>
           </div>
         </div>
 
@@ -112,19 +117,21 @@ export function App() {
 
       <main className="workspace">
         <header className="toolbar">
-          <div className="search-box">
-            <Search size={17} />
+          <div className="search-box yt-search-box">
             <input
               aria-label="Search library"
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search your library..."
+              placeholder="Search videos in library..."
               value={query}
             />
+            <button className="search-icon-btn" title="Search" type="button">
+              <Search size={16} />
+            </button>
           </div>
 
           <div className="toolbar-actions">
             <button
-              className="secondary-button"
+              className="primary-button yt-primary-btn"
               onClick={() => setView("downloads")}
               title="Download YouTube playlist or video"
               type="button"
@@ -132,8 +139,8 @@ export function App() {
               <Download size={16} />
               Paste Link
             </button>
-            <button className="primary-button" onClick={() => void importFiles()} type="button">
-              <FolderPlus size={18} />
+            <button className="secondary-button yt-secondary-btn" onClick={() => void importFiles()} type="button">
+              <FolderPlus size={17} />
               Import Local
             </button>
           </div>
