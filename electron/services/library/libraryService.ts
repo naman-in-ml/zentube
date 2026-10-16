@@ -10,6 +10,7 @@ export type MediaItem = {
   fileSizeBytes: number | null;
   durationSeconds: number | null;
   thumbnailPath: string | null;
+  subtitlePath: string | null;
   addedAt: string;
   progressPercent: number | null;
 };
@@ -51,7 +52,9 @@ function toMediaItem(row: LibraryRow): MediaItem {
     );
   }
 
-  return { ...media, progressPercent };
+  const subtitlePath = findSiblingSubtitle(media.filePath);
+
+  return { ...media, progressPercent, subtitlePath };
 }
 
 export function listMediaItems(): MediaItem[] {
@@ -93,6 +96,7 @@ export function addMediaItem(
     fileSizeBytes: stat.size,
     durationSeconds: options?.durationSeconds ?? null,
     thumbnailPath: findSiblingThumbnail(filePath),
+    subtitlePath: findSiblingSubtitle(filePath),
     addedAt: now,
     progressPercent: null
   };
@@ -124,6 +128,26 @@ export function findSiblingThumbnail(filePath: string): string | null {
     }
   }
 
+  return null;
+}
+
+export function findSiblingSubtitle(filePath: string): string | null {
+  const directory = path.dirname(filePath);
+  const base = path.basename(filePath, path.extname(filePath));
+  try {
+    if (!fs.existsSync(directory)) {
+      return null;
+    }
+    const files = fs.readdirSync(directory);
+    const match = files.find(
+      (f) => f.startsWith(base) && (f.endsWith(".vtt") || f.endsWith(".srt"))
+    );
+    if (match) {
+      return path.join(directory, match);
+    }
+  } catch {
+    return null;
+  }
   return null;
 }
 

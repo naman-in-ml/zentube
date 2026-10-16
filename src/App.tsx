@@ -3,6 +3,7 @@ import {
   Film,
   FolderPlus,
   History,
+  ListPlus,
   ListVideo,
   Play,
   Search,
@@ -13,6 +14,7 @@ import { DownloadsView } from "./components/downloads/DownloadsView";
 import { WatchHistoryView } from "./components/history/WatchHistoryView";
 import { LibraryGrid } from "./components/library/LibraryGrid";
 import { PlayerOverlay } from "./components/player/PlayerOverlay";
+import { PlaylistDrawer } from "./components/playlists/PlaylistDrawer";
 import { PlaylistsView } from "./components/playlists/PlaylistsView";
 import { SettingsView } from "./components/settings/SettingsView";
 
@@ -33,6 +35,8 @@ export function App() {
   const [initialSeek, setInitialSeek] = useState<number | null>(null);
   const [query, setQuery] = useState("");
   const [appVersion, setAppVersion] = useState("0.0.0");
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [downloadJobs, setDownloadJobs] = useState<any[]>([]);
 
   async function refresh() {
     const media = await window.zentube.library.list();
@@ -43,6 +47,28 @@ export function App() {
   useEffect(() => {
     void refresh();
   }, []);
+
+  useEffect(() => {
+    return window.zentube.downloads.onProgress((jobs) => {
+      setDownloadJobs(jobs as any[]);
+      // If a job just completed, refresh library
+      if ((jobs as any[]).some((j) => j.status === "completed")) {
+        void refresh();
+      }
+    });
+  }, []);
+
+  const activeDownloadsCount = useMemo(() => {
+    return downloadJobs.filter((j) => j.status === "running" || j.status === "queued").length;
+  }, [downloadJobs]);
+
+  async function handleStartDownload(entries: any[], playlistTitle: string | null) {
+    await window.zentube.downloads.start({
+      entries,
+      quality: "best",
+      playlistTitle
+    });
+  }
 
   useEffect(() => {
     void window.zentube.getVersion().then(setAppVersion);
@@ -108,7 +134,12 @@ export function App() {
                 type="button"
               >
                 <Icon size={18} />
-                {item.label}
+                <span className="nav-label">{item.label}</span>
+                {item.id === "downloads" && activeDownloadsCount > 0 && (
+                  <span className="sidebar-dl-badge" title={`${activeDownloadsCount} active download(s)`}>
+                    {activeDownloadsCount}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -132,12 +163,21 @@ export function App() {
           <div className="toolbar-actions">
             <button
               className="primary-button yt-primary-btn"
+              onClick={() => setIsDrawerOpen(true)}
+              title="Explore YouTube playlist videos and download"
+              type="button"
+            >
+              <ListPlus size={16} />
+              Playlist Explorer
+            </button>
+            <button
+              className="secondary-button yt-secondary-btn"
               onClick={() => setView("downloads")}
               title="Download YouTube playlist or video"
               type="button"
             >
               <Download size={16} />
-              Paste Link
+              Downloads
             </button>
             <button className="secondary-button yt-secondary-btn" onClick={() => void importFiles()} type="button">
               <FolderPlus size={17} />
@@ -205,6 +245,14 @@ export function App() {
           item={selected}
           onClose={closePlayer}
           onDelete={handleDeleteMedia}
+        />
+
+        <PlaylistDrawer
+          downloadJobs={downloadJobs}
+          isOpen={isDrawerOpen}
+          mediaItems={mediaItems}
+          onClose={() => setIsDrawerOpen(false)}
+          onStartDownload={handleStartDownload}
         />
       </main>
     </div>

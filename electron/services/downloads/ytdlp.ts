@@ -135,6 +135,8 @@ export function buildDownloadArgs(options: {
     "--sub-langs",
     "en.*,en",
     "--write-info-json",
+    "--sponsorblock-remove",
+    "sponsor,selfpromo,interaction",
     "--download-archive",
     ARCHIVE_FILE,
     "--print",

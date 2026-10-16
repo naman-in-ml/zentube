@@ -7,6 +7,7 @@ type MediaItem = {
   fileSizeBytes: number | null;
   durationSeconds: number | null;
   thumbnailPath: string | null;
+  subtitlePath?: string | null;
   addedAt: string;
   progressPercent: number | null;
 };
