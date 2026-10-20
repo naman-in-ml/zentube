@@ -142,7 +142,7 @@ export function getDashboardSummary(): DashboardSummary {
         `SELECT m.id, m.title, m.thumbnail_path AS thumbnailPath, m.duration_seconds AS durationSeconds
          FROM media_items m
          LEFT JOIN watch_progress wp ON wp.media_id = m.id
-         WHERE wp.id IS NULL OR wp.completed = 0
+         WHERE wp.media_id IS NULL OR wp.completed = 0
          ORDER BY m.added_at DESC
          LIMIT 1`
       )
