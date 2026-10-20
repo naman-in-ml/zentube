@@ -18,6 +18,15 @@ Download the latest release for your platform from [GitHub Releases](https://git
 | **Windows** | Setup Installer / Standalone Portable | 64-bit (`x64`) | [Download .exe](https://github.com/naman-in-ml/zentube/releases/latest) |
 | **Linux** | AppImage / Debian Package | 64-bit (`x64`) | [Download .AppImage / .deb](https://github.com/naman-in-ml/zentube/releases/latest) |
 
+> [!NOTE]
+> **First-Time macOS Installation (Apple Gatekeeper Notice)**:  
+> Because Zentube is a community open-source project without a paid Apple Developer certificate (\$99/yr), macOS Gatekeeper blocks downloaded apps by default with the message *"Apple could not verify Zentube.app..."*.  
+> To open it on macOS, run this single terminal command:
+> ```bash
+> xattr -cr /Applications/Zentube.app
+> ```
+> Or go to **System Settings** → **Privacy & Security** → scroll to **Security** → click **Open Anyway**.
+
 ---
 
 ## ✨ Features at a Glance
