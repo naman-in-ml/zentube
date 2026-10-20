@@ -31,6 +31,16 @@ import {
 import { getProgress, updateProgress } from "../services/progress/progressService.js";
 import { createQueueJob, listQueueJobs } from "../services/queue/queueService.js";
 import { registerUpdateIpcHandlers } from "../services/updates/updaterService.js";
+import {
+  addGoalItem,
+  createGoal,
+  deleteGoal,
+  getGoalDetails,
+  listGoals,
+  removeGoalItem,
+  updateGoal
+} from "../services/goals/goalsService.js";
+import { getDashboardSummary } from "../services/dashboard/dashboardService.js";
 
 const createPlaylistSchema = z.object({
   name: z.string().min(1).max(120),
@@ -218,6 +228,69 @@ export function registerIpcHandlers() {
       window.webContents.send("downloads:progress", jobs);
     }
   });
+
+  // Goals
+  ipcMain.handle("goals:list", () => listGoals());
+
+  ipcMain.handle("goals:create", (_event, raw: unknown) => {
+    const schema = z.object({
+      title: z.string().min(1).max(120),
+      description: z.string().max(500).optional(),
+      icon: z.string().max(50).optional(),
+      targetHours: z.number().positive().optional()
+    });
+    const payload = schema.parse(raw);
+    return createGoal(payload);
+  });
+
+  ipcMain.handle("goals:update", (_event, raw: unknown) => {
+    const schema = z.object({
+      id: z.string().uuid(),
+      title: z.string().min(1).max(120),
+      description: z.string().max(500).optional(),
+      icon: z.string().max(50).optional(),
+      targetHours: z.number().positive().optional()
+    });
+    const payload = schema.parse(raw);
+    return updateGoal(payload);
+  });
+
+  ipcMain.handle("goals:delete", (_event, raw: unknown) => {
+    const { id } = z.object({ id: z.string().uuid() }).parse(raw);
+    deleteGoal(id);
+    return true;
+  });
+
+  ipcMain.handle("goals:addItem", (_event, raw: unknown) => {
+    const schema = z.object({
+      goalId: z.string().uuid(),
+      itemType: z.enum(["playlist", "media"]),
+      itemId: z.string().uuid(),
+      position: z.number().int().optional()
+    });
+    const payload = schema.parse(raw);
+    addGoalItem(payload.goalId, payload.itemType, payload.itemId, payload.position);
+    return true;
+  });
+
+  ipcMain.handle("goals:removeItem", (_event, raw: unknown) => {
+    const schema = z.object({
+      goalId: z.string().uuid(),
+      itemType: z.enum(["playlist", "media"]),
+      itemId: z.string().uuid()
+    });
+    const payload = schema.parse(raw);
+    removeGoalItem(payload.goalId, payload.itemType, payload.itemId);
+    return true;
+  });
+
+  ipcMain.handle("goals:getDetails", (_event, raw: unknown) => {
+    const { goalId } = z.object({ goalId: z.string().uuid() }).parse(raw);
+    return getGoalDetails(goalId);
+  });
+
+  // Dashboard
+  ipcMain.handle("dashboard:getSummary", () => getDashboardSummary());
 
   registerUpdateIpcHandlers();
 }

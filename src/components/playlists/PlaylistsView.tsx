@@ -6,6 +6,7 @@ import {
   ListMusic,
   Play,
   Plus,
+  Target,
   Trash2
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -13,9 +14,10 @@ import { formatDuration } from "../../lib/format";
 
 type Props = {
   onPlayMedia: (item: MediaItem, seekSeconds?: number) => void;
+  onAssignGoal?: (playlist: PlaylistSummary) => void;
 };
 
-export function PlaylistsView({ onPlayMedia }: Props) {
+export function PlaylistsView({ onPlayMedia, onAssignGoal }: Props) {
   const [summaries, setSummaries] = useState<PlaylistSummary[]>([]);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
   const [selectedDetails, setSelectedDetails] = useState<PlaylistDetails | null>(null);
@@ -284,14 +286,29 @@ export function PlaylistsView({ onPlayMedia }: Props) {
                 <div className="playlist-card-body">
                   <div className="playlist-card-header">
                     <strong className="playlist-card-title">{summary.name}</strong>
-                    <button
-                      className="icon-button playlist-delete-btn"
-                      onClick={(e) => void handleDelete(summary.id, e)}
-                      title="Delete playlist"
-                      type="button"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div className="playlist-card-actions">
+                      {onAssignGoal && (
+                        <button
+                          className="icon-button playlist-goal-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAssignGoal(summary);
+                          }}
+                          title="Add to study goal"
+                          type="button"
+                        >
+                          <Target size={14} />
+                        </button>
+                      )}
+                      <button
+                        className="icon-button playlist-delete-btn"
+                        onClick={(e) => void handleDelete(summary.id, e)}
+                        title="Delete playlist"
+                        type="button"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="playlist-card-progress">

@@ -111,6 +111,71 @@ type UpdateStatus =
   | { state: "update-downloaded"; version: string }
   | { state: "error"; message: string };
 
+type Goal = {
+  id: string;
+  title: string;
+  description: string | null;
+  icon: string | null;
+  targetHours: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type GoalItem = {
+  goalId: string;
+  itemType: "playlist" | "media";
+  itemId: string;
+  position: number;
+  addedAt: string;
+  title: string;
+  thumbnailPath: string | null;
+  itemCount?: number;
+  completedCount?: number;
+};
+
+type GoalSummary = Goal & {
+  totalMediaCount: number;
+  completedMediaCount: number;
+  progressPercent: number;
+  items: GoalItem[];
+  upNextMedia: {
+    id: string;
+    title: string;
+    thumbnailPath: string | null;
+    durationSeconds: number | null;
+    playlistTitle: string | null;
+  } | null;
+};
+
+type DashboardSummary = {
+  continueLearning: {
+    id: string;
+    title: string;
+    thumbnailPath: string | null;
+    positionSeconds: number;
+    durationSeconds: number | null;
+    progressPercent: number;
+    playlistTitle: string | null;
+    updatedAt: string;
+  } | null;
+  upNext: {
+    id: string;
+    title: string;
+    thumbnailPath: string | null;
+    durationSeconds: number | null;
+    playlistTitle: string | null;
+    reason: string;
+  } | null;
+  goals: GoalSummary[];
+  stats: {
+    todayMinutes: number;
+    weekMinutes: number;
+    completedVideosCount: number;
+    totalLibraryVideos: number;
+    totalLibraryHours: number;
+  };
+};
+
 interface Window {
   zentube: {
     getVersion: () => Promise<string>;
@@ -127,6 +192,18 @@ interface Window {
       delete: (playlistId: string) => Promise<boolean>;
       addItem: (playlistId: string, mediaId: string) => Promise<boolean>;
       removeItem: (playlistId: string, mediaId: string) => Promise<boolean>;
+    };
+    goals: {
+      list: () => Promise<GoalSummary[]>;
+      create: (input: { title: string; description?: string; icon?: string; targetHours?: number }) => Promise<Goal>;
+      update: (input: { id: string; title: string; description?: string; icon?: string; targetHours?: number }) => Promise<Goal>;
+      delete: (id: string) => Promise<boolean>;
+      addItem: (input: { goalId: string; itemType: "playlist" | "media"; itemId: string; position?: number }) => Promise<boolean>;
+      removeItem: (input: { goalId: string; itemType: "playlist" | "media"; itemId: string }) => Promise<boolean>;
+      getDetails: (goalId: string) => Promise<GoalSummary | null>;
+    };
+    dashboard: {
+      getSummary: () => Promise<DashboardSummary>;
     };
     history: {
       log: (input: {

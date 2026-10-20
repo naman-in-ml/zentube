@@ -3,6 +3,7 @@ import {
   Film,
   FolderPlus,
   History,
+  LayoutDashboard,
   ListPlus,
   ListVideo,
   Play,
@@ -10,7 +11,10 @@ import {
   Settings
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { DashboardView } from "./components/dashboard/DashboardView";
 import { DownloadsView } from "./components/downloads/DownloadsView";
+import { AssignToGoalModal } from "./components/goals/AssignToGoalModal";
+import { CreateGoalModal } from "./components/goals/CreateGoalModal";
 import { WatchHistoryView } from "./components/history/WatchHistoryView";
 import { LibraryGrid } from "./components/library/LibraryGrid";
 import { PlayerOverlay } from "./components/player/PlayerOverlay";
@@ -18,9 +22,10 @@ import { PlaylistDrawer } from "./components/playlists/PlaylistDrawer";
 import { PlaylistsView } from "./components/playlists/PlaylistsView";
 import { SettingsView } from "./components/settings/SettingsView";
 
-type View = "library" | "playlists" | "history" | "downloads" | "settings";
+type View = "home" | "library" | "playlists" | "history" | "downloads" | "settings";
 
 const navItems: Array<{ id: View; label: string; icon: typeof Film }> = [
+  { id: "home", label: "Home", icon: LayoutDashboard },
   { id: "library", label: "Library", icon: Film },
   { id: "playlists", label: "Playlists & Courses", icon: ListVideo },
   { id: "history", label: "Watch History", icon: History },
@@ -29,18 +34,32 @@ const navItems: Array<{ id: View; label: string; icon: typeof Film }> = [
 ];
 
 export function App() {
-  const [view, setView] = useState<View>("library");
+  const [view, setView] = useState<View>("home");
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [playlists, setPlaylists] = useState<PlaylistSummary[]>([]);
+  const [goals, setGoals] = useState<GoalSummary[]>([]);
   const [selected, setSelected] = useState<MediaItem | null>(null);
   const [initialSeek, setInitialSeek] = useState<number | null>(null);
   const [query, setQuery] = useState("");
   const [appVersion, setAppVersion] = useState("0.0.0");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isCreateGoalOpen, setIsCreateGoalOpen] = useState(false);
+  const [assignGoalTarget, setAssignGoalTarget] = useState<{
+    type: "playlist" | "media";
+    id: string;
+    title: string;
+  } | null>(null);
   const [downloadJobs, setDownloadJobs] = useState<any[]>([]);
 
   async function refresh() {
-    const media = await window.zentube.library.list();
+    const [media, plList, goalsList] = await Promise.all([
+      window.zentube.library.list(),
+      window.zentube.playlists.listWithSummary(),
+      window.zentube.goals.list()
+    ]);
     setMediaItems(media);
+    setPlaylists(plList);
+    setGoals(goalsList);
     setSelected((current) => (current ? media.find((item) => item.id === current.id) ?? null : null));
   }
 
@@ -189,6 +208,17 @@ export function App() {
         </header>
 
         <section className="content">
+          {view === "home" && (
+            <DashboardView
+              mediaItems={mediaItems}
+              playlists={playlists}
+              onPlayMedia={playMedia}
+              onRequestCreateGoal={() => setIsCreateGoalOpen(true)}
+              onBrowseLibrary={() => setView("library")}
+              onBrowsePlaylists={() => setView("playlists")}
+            />
+          )}
+
           {view === "library" && (
             <div className="panel">
               <div className="panel-header">
@@ -231,7 +261,14 @@ export function App() {
             </div>
           )}
 
-          {view === "playlists" && <PlaylistsView onPlayMedia={playMedia} />}
+          {view === "playlists" && (
+            <PlaylistsView
+              onPlayMedia={playMedia}
+              onAssignGoal={(pl) =>
+                setAssignGoalTarget({ type: "playlist", id: pl.id, title: pl.name })
+              }
+            />
+          )}
 
           {view === "history" && (
             <WatchHistoryView mediaItems={mediaItems} onPlayMedia={playMedia} />
@@ -255,6 +292,23 @@ export function App() {
           mediaItems={mediaItems}
           onClose={() => setIsDrawerOpen(false)}
           onStartDownload={handleStartDownload}
+        />
+
+        <CreateGoalModal
+          isOpen={isCreateGoalOpen}
+          onClose={() => setIsCreateGoalOpen(false)}
+          onCreated={refresh}
+          playlists={playlists}
+          mediaItems={mediaItems}
+        />
+
+        <AssignToGoalModal
+          isOpen={Boolean(assignGoalTarget)}
+          onClose={() => setAssignGoalTarget(null)}
+          item={assignGoalTarget}
+          goals={goals}
+          onAssigned={refresh}
+          onRequestCreateGoal={() => setIsCreateGoalOpen(true)}
         />
       </main>
     </div>
