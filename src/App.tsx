@@ -108,8 +108,10 @@ export function App() {
     await refresh();
   }
 
+  const isMac = typeof navigator !== "undefined" && navigator.userAgent.includes("Mac");
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${isMac ? "platform-mac" : ""}`}>
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark yt-mark">

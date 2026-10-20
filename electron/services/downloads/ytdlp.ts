@@ -2,6 +2,11 @@ import { spawn, spawnSync } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import {
+  checkResolvedTools,
+  getBinaryPaths,
+  getEnhancedEnv
+} from "./binaryResolver.js";
 
 export type QualityPreset = "best" | "1080" | "720" | "480" | "audio";
 
@@ -20,8 +25,6 @@ export type ResolveResult = {
 
 export const DEFAULT_OUT_DIR = path.join(os.homedir(), "Zentube");
 export const ARCHIVE_FILE = path.join(DEFAULT_OUT_DIR, ".zarchiv.txt");
-
-const BIN = process.env.ZENTUBE_YTDLP_BIN ?? "yt-dlp";
 
 const MEDIA_EXTENSIONS = new Set([
   ".mp4",
@@ -58,22 +61,23 @@ export function checkTools(): {
   ytDlpVersion: string | null;
   ffmpeg: boolean;
 } {
-  const ytDlp = spawnSync(BIN, ["--version"], { timeout: 10000, encoding: "utf8" });
-  const ffmpeg = spawnSync("ffmpeg", ["-version"], { timeout: 10000, encoding: "utf8" });
-
+  const result = checkResolvedTools();
   return {
-    ytDlp: ytDlp.status === 0,
-    ytDlpVersion: ytDlp.status === 0 ? ytDlp.stdout.trim().split("\n")[0] : null,
-    ffmpeg: ffmpeg.status === 0
+    ytDlp: result.ytDlp,
+    ytDlpVersion: result.ytDlpVersion,
+    ffmpeg: result.ffmpeg
   };
 }
 
 export function resolveUrl(input: string): Promise<ResolveResult> {
+  const { ytDlpPath } = getBinaryPaths();
+  const env = getEnhancedEnv();
+
   return new Promise((resolve, reject) => {
     const child = spawn(
-      BIN,
+      ytDlpPath,
       ["-J", "--flat-playlist", "--no-warnings", "--no-color", input],
-      { stdio: ["ignore", "pipe", "pipe"] }
+      { stdio: ["ignore", "pipe", "pipe"], env }
     );
 
     let out = "";

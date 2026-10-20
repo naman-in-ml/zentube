@@ -54,6 +54,22 @@ select {
   min-height: 100vh;
 }
 
+/* macOS Window Titlebar and Spacing */
+.platform-mac .sidebar {
+  padding-top: 42px;
+}
+
+.platform-mac .toolbar {
+  padding-top: 14px;
+  -webkit-app-region: drag;
+}
+
+.platform-mac .toolbar button,
+.platform-mac .toolbar input,
+.platform-mac .toolbar a {
+  -webkit-app-region: no-drag;
+}
+
 /* Sidebar */
 .sidebar {
   display: flex;
