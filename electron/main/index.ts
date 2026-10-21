@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { killAllDownloads } from "../services/downloads/downloadManager.js";
+import { initBackgroundYtDlpUpdater } from "../services/downloads/binaryResolver.js";
 import { initializeDatabase } from "../services/db/client.js";
 import { backfillThumbnails } from "../services/library/libraryService.js";
 import { registerIpcHandlers } from "./ipc.js";
@@ -24,6 +25,7 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 function createWindow() {
+  const isMac = process.platform === "darwin";
   const window = new BrowserWindow({
     width: 1280,
     height: 820,
@@ -31,6 +33,8 @@ function createWindow() {
     minHeight: 640,
     title: "Zentube",
     backgroundColor: "#0f0f0f",
+    titleBarStyle: isMac ? "hiddenInset" : "default",
+    trafficLightPosition: isMac ? { x: 18, y: 18 } : undefined,
     webPreferences: {
       preload: path.join(__dirname, "../preload/index.js"),
       contextIsolation: true,
@@ -100,6 +104,7 @@ app.whenReady().then(() => {
   backfillThumbnails();
   registerIpcHandlers();
   createWindow();
+  initBackgroundYtDlpUpdater();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {

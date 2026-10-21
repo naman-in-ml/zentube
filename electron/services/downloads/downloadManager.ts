@@ -13,6 +13,7 @@ import {
   type QualityPreset,
   type ResolvedEntry
 } from "./ytdlp.js";
+import { getBinaryPaths, getEnhancedEnv } from "./binaryResolver.js";
 
 export type DownloadJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
 
@@ -140,7 +141,9 @@ function runNext() {
     playlistTitle: job.playlistTitle
   });
 
-  const child = spawn(BIN, args, { stdio: ["ignore", "pipe", "pipe"] });
+  const { ytDlpPath } = getBinaryPaths();
+  const env = getEnhancedEnv();
+  const child = spawn(ytDlpPath, args, { stdio: ["ignore", "pipe", "pipe"], env });
   activeProcess = child;
 
   let stderrTail = "";

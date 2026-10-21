@@ -18,6 +18,14 @@ import {
   getPlaylistDetails,
   listPlaylistsWithSummary
 } from "../dist-electron/services/playlists/playlistService.js";
+import {
+  addGoalItem,
+  createGoal,
+  deleteGoal,
+  listGoals,
+  removeGoalItem
+} from "../dist-electron/services/goals/goalsService.js";
+import { getDashboardSummary } from "../dist-electron/services/dashboard/dashboardService.js";
 
 const home = fs.mkdtempSync(path.join(os.tmpdir(), "zentube-test-"));
 app.setPath("userData", path.join(home, "user-data"));
@@ -100,6 +108,25 @@ assert("playlist item has title and position", details.items[0].title === "Learn
 
 const summaries = listPlaylistsWithSummary();
 assert("listPlaylistsWithSummary returns course with counts", summaries.length >= 1 && summaries[0].itemCount === 1);
+
+// 4. Goals & Learning Dashboard tests
+const goal = createGoal({ title: "Master Modern Web Development", icon: "🚀", description: "Frontend & backend" });
+assert("creates goal with id and title", goal.id && goal.title === "Master Modern Web Development");
+
+addGoalItem(goal.id, "playlist", playlist.id);
+const goalsList = listGoals();
+assert("listGoals returns goal with attached playlist", goalsList.length === 1 && goalsList[0].items.length === 1);
+assert("goal tracks total media count from playlist", goalsList[0].totalMediaCount === 1);
+
+const dashSummary = getDashboardSummary();
+assert("dashboard returns goals list", dashSummary.goals.length === 1);
+assert("dashboard returns stats structure", typeof dashSummary.stats.todayMinutes === "number" && typeof dashSummary.stats.completedVideosCount === "number");
+
+removeGoalItem(goal.id, "playlist", playlist.id);
+assert("removeGoalItem clears attached item", listGoals()[0].items.length === 0);
+
+deleteGoal(goal.id);
+assert("deleteGoal removes goal", listGoals().length === 0);
 
 deleteMediaItem(media.id, false);
 assert("deleteMediaItem removes item from media list", listMediaItems().length === 0);

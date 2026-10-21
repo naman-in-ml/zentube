@@ -1,8 +1,12 @@
 {
   "name": "zentube",
-  "version": "0.1.8",
+  "version": "0.2.1",
   "private": true,
   "description": "Local-first desktop playlist and media library manager.",
+  "author": {
+    "name": "Naman",
+    "email": "naman@zentube.app"
+  },
   "main": "dist-electron/main/index.js",
   "scripts": {
     "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
@@ -10,12 +14,14 @@
     "dev:electron": "npm run build:electron && wait-on http://127.0.0.1:5173 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .",
     "build": "tsc -p tsconfig.json && vite build && npm run build:electron",
     "build:electron": "tsc -p tsconfig.electron.json",
+    "fetch:binaries": "node scripts/fetch-binaries.mjs",
+    "generate:icons": "node scripts/generate-icons.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "start": "electron .",
     "dist": "npm run build && electron-builder",
     "release": "npm run build && electron-builder --publish always",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.electron.json",
-    "test:smoke": "npm run build:electron && electron --no-sandbox scripts/progress-smoke.mjs",
+    "test:smoke": "npm run build:electron && electron --no-sandbox scripts/progress-smoke.mjs && electron --no-sandbox scripts/dashboard-smoke.mjs",
     "test": "npm run typecheck && npm run test:smoke",
     "postinstall": "electron-builder install-app-deps"
   },
@@ -50,18 +56,88 @@
       "repo": "zentube"
     },
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "build"
     },
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
       "package.json"
     ],
+    "extraResources": [
+      {
+        "from": "resources/bin",
+        "to": "bin",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
     "asarUnpack": [
       "**/*.node"
     ],
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.education",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Zentube"
+    },
     "linux": {
-      "target": "AppImage",
+      "maintainer": "Naman <naman@zentube.app>",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
       "category": "AudioVideo"
     }
   },

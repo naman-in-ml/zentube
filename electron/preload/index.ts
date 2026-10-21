@@ -63,5 +63,21 @@ contextBridge.exposeInMainWorld("zentube", {
       ipcRenderer.on("updates:status", listener);
       return () => ipcRenderer.removeListener("updates:status", listener);
     }
+  },
+  goals: {
+    list: () => ipcRenderer.invoke("goals:list"),
+    create: (input: { title: string; description?: string; icon?: string; targetHours?: number }) =>
+      ipcRenderer.invoke("goals:create", input),
+    update: (input: { id: string; title: string; description?: string; icon?: string; targetHours?: number }) =>
+      ipcRenderer.invoke("goals:update", input),
+    delete: (id: string) => ipcRenderer.invoke("goals:delete", { id }),
+    addItem: (input: { goalId: string; itemType: "playlist" | "media"; itemId: string; position?: number }) =>
+      ipcRenderer.invoke("goals:addItem", input),
+    removeItem: (input: { goalId: string; itemType: "playlist" | "media"; itemId: string }) =>
+      ipcRenderer.invoke("goals:removeItem", input),
+    getDetails: (goalId: string) => ipcRenderer.invoke("goals:getDetails", { goalId })
+  },
+  dashboard: {
+    getSummary: () => ipcRenderer.invoke("dashboard:getSummary")
   }
 });

@@ -68,7 +68,28 @@ CREATE TABLE IF NOT EXISTS watch_history (
   FOREIGN KEY (media_id) REFERENCES media_items(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS goals (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  icon TEXT,
+  target_hours REAL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS goal_items (
+  goal_id TEXT NOT NULL,
+  item_type TEXT NOT NULL CHECK(item_type IN ('playlist', 'media')),
+  item_id TEXT NOT NULL,
+  position INTEGER NOT NULL DEFAULT 0,
+  added_at TEXT NOT NULL,
+  PRIMARY KEY (goal_id, item_type, item_id),
+  FOREIGN KEY (goal_id) REFERENCES goals(id) ON DELETE CASCADE
+);
+
 CREATE INDEX IF NOT EXISTS idx_media_title ON media_items(title);
 CREATE INDEX IF NOT EXISTS idx_queue_status ON queue_jobs(status);
 CREATE INDEX IF NOT EXISTS idx_history_stopped ON watch_history(stopped_at);
+CREATE INDEX IF NOT EXISTS idx_goal_items_lookup ON goal_items(goal_id, position);
 `;
