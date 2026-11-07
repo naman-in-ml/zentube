@@ -5,7 +5,6 @@ import {
   HardDrive,
   History,
   LayoutDashboard,
-  ListPlus,
   ListVideo,
   Play,
   Search,
@@ -19,7 +18,6 @@ import { CreateGoalModal } from "./components/goals/CreateGoalModal";
 import { WatchHistoryView } from "./components/history/WatchHistoryView";
 import { LibraryGrid } from "./components/library/LibraryGrid";
 import { PlayerOverlay } from "./components/player/PlayerOverlay";
-import { PlaylistDrawer } from "./components/playlists/PlaylistDrawer";
 import { PlaylistsView } from "./components/playlists/PlaylistsView";
 import { SettingsView } from "./components/settings/SettingsView";
 import { StorageDashboardView } from "./components/storage/StorageDashboardView";
@@ -45,7 +43,6 @@ export function App() {
   const [initialSeek, setInitialSeek] = useState<number | null>(null);
   const [query, setQuery] = useState("");
   const [appVersion, setAppVersion] = useState("0.0.0");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isCreateGoalOpen, setIsCreateGoalOpen] = useState(false);
   const [assignGoalTarget, setAssignGoalTarget] = useState<{
     type: "playlist" | "media";
@@ -83,14 +80,6 @@ export function App() {
   const activeDownloadsCount = useMemo(() => {
     return downloadJobs.filter((j) => j.status === "running" || j.status === "queued").length;
   }, [downloadJobs]);
-
-  async function handleStartDownload(entries: any[], playlistTitle: string | null) {
-    await window.zentube.downloads.start({
-      entries,
-      quality: "best",
-      playlistTitle
-    });
-  }
 
   useEffect(() => {
     void window.zentube.getVersion().then(setAppVersion);
@@ -187,25 +176,16 @@ export function App() {
           <div className="toolbar-actions">
             <button
               className="primary-button yt-primary-btn"
-              onClick={() => setIsDrawerOpen(true)}
-              title="Explore YouTube playlist videos and download"
-              type="button"
-            >
-              <ListPlus size={16} />
-              Playlist Explorer
-            </button>
-            <button
-              className="secondary-button yt-secondary-btn"
               onClick={() => setView("downloads")}
-              title="Download YouTube playlist or video"
+              title="Download & import YouTube playlists or videos"
               type="button"
             >
               <Download size={16} />
-              Downloads
+              Download & Import
             </button>
             <button className="secondary-button yt-secondary-btn" onClick={() => void importFiles()} type="button">
               <FolderPlus size={17} />
-              Import Local
+              Import Local Files
             </button>
           </div>
         </header>
@@ -278,7 +258,12 @@ export function App() {
             <WatchHistoryView mediaItems={mediaItems} onPlayMedia={playMedia} />
           )}
 
-          {view === "downloads" && <DownloadsView onLibraryChanged={refresh} />}
+          {view === "downloads" && (
+            <DownloadsView
+              onLibraryChanged={refresh}
+              mediaItems={mediaItems}
+            />
+          )}
 
           {view === "storage" && (
             <StorageDashboardView
@@ -295,14 +280,6 @@ export function App() {
           item={selected}
           onClose={closePlayer}
           onDelete={handleDeleteMedia}
-        />
-
-        <PlaylistDrawer
-          downloadJobs={downloadJobs}
-          isOpen={isDrawerOpen}
-          mediaItems={mediaItems}
-          onClose={() => setIsDrawerOpen(false)}
-          onStartDownload={handleStartDownload}
         />
 
         <CreateGoalModal

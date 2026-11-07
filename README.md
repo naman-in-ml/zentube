@@ -38,10 +38,11 @@ Download the latest release for your platform from [GitHub Releases](https://git
 - **Study Pulse Metrics**: Tracks minutes studied today, 7-day focus time, completed lessons, and total offline library volume.
 - **Contextual Assignment**: Add courses or videos directly to goals from playlist cards with a single click.
 
-### 📥 Smart Ingestion & Playlist Explorer
-- **Playlist Explorer Drawer**: Paste any YouTube playlist link to inspect every video, title, and duration before downloading.
+### 📥 Unified Ingestion & Playlist Importer
+- **Unified Download View**: Paste any YouTube video or playlist link into a single canonical downloads workflow with format and quality selection.
+- **Playlist Inspector**: Inspect every video, title, and duration before downloading, with automatic badges highlighting items already saved in your offline library.
 - **Granular Quality Selection**: Download in 1080p, 720p, 480p, Best available, or Audio-only format.
-- **Batch Downloads**: Queue single tracks or click *Download All* to ingest complete playlists in one click.
+- **Batch & Selective Downloads**: Select all or selectively pick specific videos to download from long playlists.
 - **SponsorBlock Integration**: Automatically skips sponsored segments, self-promos, and interaction reminders directly during acquisition.
 - **Bundled & Auto-Updating Engine**: Bundles `yt-dlp` and `ffmpeg` out of the box with silent background updates so YouTube format changes never break downloads.
 

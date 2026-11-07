@@ -12,9 +12,10 @@ const QUALITY_OPTIONS: Array<{ value: DownloadQuality; label: string }> = [
 
 type Props = {
   onLibraryChanged: () => void;
+  mediaItems?: MediaItem[];
 };
 
-export function DownloadsView({ onLibraryChanged }: Props) {
+export function DownloadsView({ onLibraryChanged, mediaItems }: Props) {
   const [url, setUrl] = useState("");
   const [quality, setQuality] = useState<DownloadQuality>("720");
   const [resolving, setResolving] = useState(false);
@@ -85,6 +86,15 @@ export function DownloadsView({ onLibraryChanged }: Props) {
     } finally {
       setResolving(false);
     }
+  }
+
+  function isDownloaded(entry: DownloadEntry): boolean {
+    if (!mediaItems) return false;
+    return mediaItems.some(
+      (m) =>
+        (entry.id && m.filePath.includes(entry.id)) ||
+        m.title.toLowerCase().trim() === entry.title.toLowerCase().trim()
+    );
   }
 
   function toggleEntry(id: string) {
@@ -234,7 +244,12 @@ export function DownloadsView({ onLibraryChanged }: Props) {
                   />
                   <div>
                     <strong>{entry.title}</strong>
-                    <span>{entry.duration ? formatDuration(entry.duration) : "—"}</span>
+                    <div className="dl-entry-meta">
+                      <span>{entry.duration ? formatDuration(entry.duration) : "—"}</span>
+                      {isDownloaded(entry) && (
+                        <span className="dl-entry-exists-badge">Downloaded</span>
+                      )}
+                    </div>
                   </div>
                 </label>
               );
