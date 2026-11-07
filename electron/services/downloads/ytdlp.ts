@@ -23,7 +23,7 @@ export type ResolveResult = {
   entries: ResolvedEntry[];
 };
 
-export const DEFAULT_OUT_DIR = path.join(os.homedir(), "Zentube");
+export const DEFAULT_OUT_DIR = process.env.ZENTUBE_OUT_DIR ?? path.join(os.homedir(), "Zentube");
 export const ARCHIVE_FILE = path.join(DEFAULT_OUT_DIR, ".zarchiv.txt");
 
 const MEDIA_EXTENSIONS = new Set([

@@ -79,5 +79,11 @@ contextBridge.exposeInMainWorld("zentube", {
   },
   dashboard: {
     getSummary: () => ipcRenderer.invoke("dashboard:getSummary")
+  },
+  storage: {
+    getSummary: () => ipcRenderer.invoke("storage:getSummary"),
+    deleteItems: (mediaIds: string[], deleteFileFromDisk = true) =>
+      ipcRenderer.invoke("storage:deleteItems", { mediaIds, deleteFileFromDisk }),
+    openFolder: () => ipcRenderer.invoke("storage:openFolder")
   }
 });

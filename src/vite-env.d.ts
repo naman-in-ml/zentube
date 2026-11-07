@@ -176,9 +176,68 @@ type DashboardSummary = {
   };
 };
 
+type StorageCategoryBreakdown = {
+  bytes: number;
+  count: number;
+};
+
+type StorageCourseItem = {
+  id: string;
+  name: string;
+  coverThumbnail: string | null;
+  videoCount: number;
+  completedCount: number;
+  totalSizeBytes: number;
+  totalDurationSeconds: number;
+  percentOfZentube: number;
+};
+
+type CleanupItem = {
+  id: string;
+  title: string;
+  filePath: string;
+  fileSizeBytes: number;
+  durationSeconds: number | null;
+  thumbnailPath: string | null;
+  addedAt: string;
+  lastWatchedAt: string | null;
+  completed: boolean;
+  playlistTitle: string | null;
+  progressPercent: number | null;
+};
+
+type StorageSummary = {
+  storageDirectory: string;
+  totalDiskBytes: number;
+  freeDiskBytes: number;
+  usedDiskBytes: number;
+  zentubeTotalBytes: number;
+  breakdown: {
+    video: StorageCategoryBreakdown;
+    audio: StorageCategoryBreakdown;
+    thumbnail: StorageCategoryBreakdown;
+    subtitle: StorageCategoryBreakdown;
+    metadata: StorageCategoryBreakdown;
+    other: StorageCategoryBreakdown;
+  };
+  totalFiles: number;
+  totalLibraryVideos: number;
+  courses: StorageCourseItem[];
+  cleanupCandidates: {
+    completed: CleanupItem[];
+    largest: CleanupItem[];
+    stale: CleanupItem[];
+  };
+};
+
 interface Window {
   zentube: {
     getVersion: () => Promise<string>;
+    storage: {
+      getSummary: () => Promise<StorageSummary>;
+      deleteItems: (mediaIds: string[], deleteFileFromDisk?: boolean) => Promise<{ deletedCount: number; reclaimedBytes: number }>;
+      openFolder: () => Promise<boolean>;
+    };
     library: {
       list: () => Promise<MediaItem[]>;
       delete: (id: string, deleteFileFromDisk?: boolean) => Promise<boolean>;

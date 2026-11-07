@@ -41,6 +41,11 @@ import {
   updateGoal
 } from "../services/goals/goalsService.js";
 import { getDashboardSummary } from "../services/dashboard/dashboardService.js";
+import {
+  deleteStorageItems,
+  getStorageSummary,
+  openStorageDirectory
+} from "../services/storage/storageService.js";
 
 const createPlaylistSchema = z.object({
   name: z.string().min(1).max(120),
@@ -291,6 +296,20 @@ export function registerIpcHandlers() {
 
   // Dashboard
   ipcMain.handle("dashboard:getSummary", () => getDashboardSummary());
+
+  // Storage & Disk Cleanup
+  ipcMain.handle("storage:getSummary", () => getStorageSummary());
+
+  ipcMain.handle("storage:deleteItems", (_event, raw: unknown) => {
+    const schema = z.object({
+      mediaIds: z.array(z.string().uuid()).min(1),
+      deleteFileFromDisk: z.boolean().optional().default(true)
+    });
+    const { mediaIds, deleteFileFromDisk } = schema.parse(raw);
+    return deleteStorageItems(mediaIds, deleteFileFromDisk);
+  });
+
+  ipcMain.handle("storage:openFolder", () => openStorageDirectory());
 
   registerUpdateIpcHandlers();
 }

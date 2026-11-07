@@ -1,6 +1,6 @@
 export function formatBytes(bytes: number | null): string {
-  if (!bytes) return "Unknown size";
-  const units = ["B", "KB", "MB", "GB"];
+  if (!bytes) return "0 B";
+  const units = ["B", "KB", "MB", "GB", "TB"];
   let value = bytes;
   let unit = 0;
   while (value >= 1024 && unit < units.length - 1) {
