@@ -22,6 +22,7 @@ interface DashboardViewProps {
   onRequestCreateGoal: () => void;
   onBrowseLibrary: () => void;
   onBrowsePlaylists: () => void;
+  onBrowseStorage?: () => void;
 }
 
 export function DashboardView({
@@ -30,7 +31,8 @@ export function DashboardView({
   onPlayMedia,
   onRequestCreateGoal,
   onBrowseLibrary,
-  onBrowsePlaylists
+  onBrowsePlaylists,
+  onBrowseStorage
 }: DashboardViewProps) {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -426,7 +428,12 @@ export function DashboardView({
             </div>
           </div>
 
-          <div className="stat-card">
+          <div
+            className="stat-card"
+            onClick={onBrowseStorage}
+            style={onBrowseStorage ? { cursor: "pointer" } : undefined}
+            title={onBrowseStorage ? "Click to view Storage & Disk Cleanup" : undefined}
+          >
             <div className="stat-icon-wrapper" style={{ background: "rgba(168, 85, 247, 0.15)", color: "#a855f7" }}>
               <BookOpen size={22} />
             </div>

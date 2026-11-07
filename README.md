@@ -57,6 +57,14 @@ Download the latest release for your platform from [GitHub Releases](https://git
 - **Watch Session Logging**: Records exact playback intervals (`watched from timestamp X to Y`) for resume capability and study tracking.
 - **Local SQLite Storage**: Fast, offline metadata and history stored entirely on your device via WAL-mode SQLite.
 
+### 💾 Storage & Disk Cleanup Dashboard
+- **Disk Footprint Analytics**: Real-time system drive capacity breakdown (Zentube storage vs other used data vs free disk space).
+- **Format Breakdown**: Categorized file sizes across Video, Audio, Thumbnails, Subtitles/Transcripts, and Metadata.
+- **Course Space Breakdown**: View total disk usage and duration per downloaded course with 1-click batch cleanup selection.
+- **Smart Cleanup Recommendations**: Instant tabs for **Watched & Completed** videos, **Largest Media Files**, and **Inactive/Stale** videos older than 30 days.
+- **Safe Batch Space Reclamation**: Select multiple video files, preview exact reclaimed gigabytes in real-time, and confirm permanent purging with automatic SQLite synchronization.
+- **Direct Storage Access**: 1-click button to open the local storage directory in macOS Finder or Windows/Linux File Explorer.
+
 ### ⚡ Queue & Library Management
 - **Queue Control**: Pause, resume, retry, or cancel ongoing download tasks.
 - **Video File Deletion**: Delete downloaded media directly from the UI to reclaim disk space with synchronized database cleanup.

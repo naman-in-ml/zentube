@@ -2,6 +2,7 @@ import {
   Download,
   Film,
   FolderPlus,
+  HardDrive,
   History,
   LayoutDashboard,
   ListPlus,
@@ -21,8 +22,9 @@ import { PlayerOverlay } from "./components/player/PlayerOverlay";
 import { PlaylistDrawer } from "./components/playlists/PlaylistDrawer";
 import { PlaylistsView } from "./components/playlists/PlaylistsView";
 import { SettingsView } from "./components/settings/SettingsView";
+import { StorageDashboardView } from "./components/storage/StorageDashboardView";
 
-type View = "home" | "library" | "playlists" | "history" | "downloads" | "settings";
+type View = "home" | "library" | "playlists" | "history" | "downloads" | "storage" | "settings";
 
 const navItems: Array<{ id: View; label: string; icon: typeof Film }> = [
   { id: "home", label: "Home", icon: LayoutDashboard },
@@ -30,6 +32,7 @@ const navItems: Array<{ id: View; label: string; icon: typeof Film }> = [
   { id: "playlists", label: "Playlists & Courses", icon: ListVideo },
   { id: "history", label: "Watch History", icon: History },
   { id: "downloads", label: "Downloads", icon: Download },
+  { id: "storage", label: "Storage", icon: HardDrive },
   { id: "settings", label: "Settings", icon: Settings }
 ];
 
@@ -216,6 +219,7 @@ export function App() {
               onRequestCreateGoal={() => setIsCreateGoalOpen(true)}
               onBrowseLibrary={() => setView("library")}
               onBrowsePlaylists={() => setView("playlists")}
+              onBrowseStorage={() => setView("storage")}
             />
           )}
 
@@ -275,6 +279,13 @@ export function App() {
           )}
 
           {view === "downloads" && <DownloadsView onLibraryChanged={refresh} />}
+
+          {view === "storage" && (
+            <StorageDashboardView
+              onPlayMedia={playMedia}
+              onRefreshLibrary={refresh}
+            />
+          )}
 
           {view === "settings" && <SettingsView version={appVersion} />}
         </section>
