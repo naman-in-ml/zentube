@@ -18,6 +18,7 @@ import {
   getPlaylistDetails,
   listPlaylistsWithSummary
 } from "../dist-electron/services/playlists/playlistService.js";
+import { buildDownloadArgs } from "../dist-electron/services/downloads/ytdlp.js";
 import {
   addGoalItem,
   createGoal,
@@ -131,6 +132,12 @@ assert("deleteGoal removes goal", listGoals().length === 0);
 deleteMediaItem(media.id, false);
 assert("deleteMediaItem removes item from media list", listMediaItems().length === 0);
 assert("deleteMediaItem cascades to playlist items", getPlaylistDetails(playlist.id).items.length === 0);
+
+// 5. Download pipeline args verification
+const dlArgs = buildDownloadArgs({ url: "https://www.youtube.com/watch?v=mock123", quality: "720", playlistTitle: "Course" });
+assert("download args include --write-auto-subs", dlArgs.includes("--write-auto-subs"));
+assert("download args include --write-subs", dlArgs.includes("--write-subs"));
+assert("download args include sponsorblock", dlArgs.includes("--sponsorblock-remove"));
 
 console.log("userData:", app.getPath("userData"));
 app.exit(process.exitCode ?? 0);

@@ -136,6 +136,7 @@ export function buildDownloadArgs(options: {
     "--ignore-errors",
     "--write-thumbnail",
     "--write-subs",
+    "--write-auto-subs",
     "--sub-langs",
     "en.*,en",
     "--write-info-json",
