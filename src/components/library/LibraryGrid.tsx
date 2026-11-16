@@ -1,4 +1,4 @@
-import { Film, Play, Trash2 } from "lucide-react";
+import { BookOpen, Film, Play, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { formatBytes, formatDuration, mediaThumbUrl } from "../../lib/format";
 
@@ -25,6 +25,21 @@ export function LibraryGrid({ items, selectedId, onSelect, onDelete }: Props) {
   function handleCancelDelete(e: React.MouseEvent) {
     e.stopPropagation();
     setConfirmDeleteId(null);
+  }
+
+  async function handleCopyTranscript(item: MediaItem, e: React.MouseEvent) {
+    e.stopPropagation();
+    try {
+      const res = await window.zentube.library.getTranscript(item.id);
+      if (res && res.hasTranscript && res.text) {
+        await navigator.clipboard.writeText(res.text);
+        alert(`✨ Copied transcript for "${item.title}" to clipboard for NotebookLM!`);
+      } else {
+        alert("No transcript available for this video.");
+      }
+    } catch {
+      alert("Failed to copy transcript.");
+    }
   }
 
   return (
@@ -64,6 +79,17 @@ export function LibraryGrid({ items, selectedId, onSelect, onDelete }: Props) {
               <div className="yt-hover-play">
                 <Play size={20} fill="currentColor" />
               </div>
+
+              {item.subtitlePath && (
+                <button
+                  className="yt-card-action-btn"
+                  onClick={(e) => void handleCopyTranscript(item, e)}
+                  title="Copy transcript for NotebookLM / AI"
+                  type="button"
+                >
+                  <BookOpen size={14} />
+                </button>
+              )}
 
               {onDelete && (
                 <button

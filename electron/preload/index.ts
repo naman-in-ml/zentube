@@ -6,7 +6,8 @@ contextBridge.exposeInMainWorld("zentube", {
     list: () => ipcRenderer.invoke("library:list"),
     delete: (id: string, deleteFileFromDisk = true) =>
       ipcRenderer.invoke("library:delete", { id, deleteFileFromDisk }),
-    importFiles: () => ipcRenderer.invoke("library:importFiles")
+    importFiles: () => ipcRenderer.invoke("library:importFiles"),
+    getTranscript: (mediaId: string) => ipcRenderer.invoke("library:getTranscript", { mediaId })
   },
   playlists: {
     list: () => ipcRenderer.invoke("playlists:list"),
@@ -18,7 +19,9 @@ contextBridge.exposeInMainWorld("zentube", {
     addItem: (playlistId: string, mediaId: string) =>
       ipcRenderer.invoke("playlists:addItem", { playlistId, mediaId }),
     removeItem: (playlistId: string, mediaId: string) =>
-      ipcRenderer.invoke("playlists:removeItem", { playlistId, mediaId })
+      ipcRenderer.invoke("playlists:removeItem", { playlistId, mediaId }),
+    getTranscript: (playlistId: string) =>
+      ipcRenderer.invoke("playlists:getTranscript", { playlistId })
   },
   history: {
     log: (input: {

@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  BookOpen,
   CheckCircle,
   Clock,
   Film,
@@ -23,6 +24,7 @@ export function PlaylistsView({ onPlayMedia, onAssignGoal }: Props) {
   const [selectedDetails, setSelectedDetails] = useState<PlaylistDetails | null>(null);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [copyingCourse, setCopyingCourse] = useState(false);
 
   async function refreshSummaries() {
     setLoading(true);
@@ -76,6 +78,39 @@ export function PlaylistsView({ onPlayMedia, onAssignGoal }: Props) {
     await window.zentube.playlists.removeItem(selectedPlaylistId, mediaId);
     await loadDetails(selectedPlaylistId);
     await refreshSummaries();
+  }
+
+  async function handleCopyCourseForNotebookLM() {
+    if (!selectedPlaylistId) return;
+    setCopyingCourse(true);
+    try {
+      const result = await window.zentube.playlists.getTranscript(selectedPlaylistId);
+      if (result && result.hasTranscript && result.text) {
+        await navigator.clipboard.writeText(result.text);
+        alert(`✨ Copied all lesson transcripts for "${result.title}" to clipboard for NotebookLM!`);
+      } else {
+        alert("No transcripts found for videos in this playlist yet.");
+      }
+    } catch {
+      alert("Failed to copy course transcript.");
+    } finally {
+      setCopyingCourse(false);
+    }
+  }
+
+  async function handleCopyItemTranscript(mediaId: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    try {
+      const result = await window.zentube.library.getTranscript(mediaId);
+      if (result && result.hasTranscript && result.text) {
+        await navigator.clipboard.writeText(result.text);
+        alert(`✨ Copied transcript for "${result.title}" to clipboard for NotebookLM!`);
+      } else {
+        alert("No transcript found for this video.");
+      }
+    } catch {
+      alert("Failed to copy transcript.");
+    }
   }
 
   function handlePlayItem(item: PlaylistItem) {
@@ -133,10 +168,22 @@ export function PlaylistsView({ onPlayMedia, onAssignGoal }: Props) {
           </div>
 
           {items.length > 0 && (
-            <button className="primary-button" onClick={handleContinueCourse} type="button">
-              <Play size={16} fill="currentColor" />
-              {completedCount === 0 ? "Start Course" : "Continue Course"}
-            </button>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <button
+                className="secondary-button"
+                disabled={copyingCourse}
+                onClick={() => void handleCopyCourseForNotebookLM()}
+                title="Copy entire course transcripts for NotebookLM / AI"
+                type="button"
+              >
+                <BookOpen size={16} />
+                {copyingCourse ? "Copying..." : "Copy for NotebookLM"}
+              </button>
+              <button className="primary-button" onClick={handleContinueCourse} type="button">
+                <Play size={16} fill="currentColor" />
+                {completedCount === 0 ? "Start Course" : "Continue Course"}
+              </button>
+            </div>
           )}
         </div>
 
@@ -197,6 +244,14 @@ export function PlaylistsView({ onPlayMedia, onAssignGoal }: Props) {
                   </div>
 
                   <div className="playlist-item-actions">
+                    <button
+                      className="icon-button"
+                      onClick={(e) => void handleCopyItemTranscript(item.mediaId, e)}
+                      title="Copy lesson transcript for NotebookLM"
+                      type="button"
+                    >
+                      <BookOpen size={15} />
+                    </button>
                     <button
                       className="icon-button"
                       onClick={(e) => void handleRemoveItem(item.mediaId, e)}

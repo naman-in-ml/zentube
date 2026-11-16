@@ -19,6 +19,7 @@ import {
   listPlaylistsWithSummary
 } from "../dist-electron/services/playlists/playlistService.js";
 import { buildDownloadArgs } from "../dist-electron/services/downloads/ytdlp.js";
+import { cleanVttTranscript } from "../dist-electron/services/library/transcriptService.js";
 import {
   addGoalItem,
   createGoal,
@@ -138,6 +139,25 @@ const dlArgs = buildDownloadArgs({ url: "https://www.youtube.com/watch?v=mock123
 assert("download args include --write-auto-subs", dlArgs.includes("--write-auto-subs"));
 assert("download args include --write-subs", dlArgs.includes("--write-subs"));
 assert("download args include sponsorblock", dlArgs.includes("--sponsorblock-remove"));
+
+// 6. Transcript clean & NotebookLM export verification
+const sampleVtt = `WEBVTT
+Kind: captions
+Language: en
+
+00:00:00.000 --> 00:00:02.500
+<c>Hello</c> and welcome back.
+
+00:00:02.500 --> 00:00:05.000
+Today we will build a full stack app.
+
+00:00:05.000 --> 00:00:07.000
+Today we will build a full stack app.
+`;
+const cleaned = cleanVttTranscript(sampleVtt);
+assert("cleanVttTranscript strips headers and tags", !cleaned.includes("WEBVTT") && !cleaned.includes("<c>"));
+assert("cleanVttTranscript strips timecodes", !cleaned.includes("-->"));
+assert("cleanVttTranscript deduplicates identical lines", (cleaned.match(/Today we will build a full stack app\./g) || []).length === 1);
 
 console.log("userData:", app.getPath("userData"));
 app.exit(process.exitCode ?? 0);

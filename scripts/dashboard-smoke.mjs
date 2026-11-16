@@ -112,11 +112,11 @@ assert("Goal completedMediaCount is 1", goalDetail.completedMediaCount === 1);
 
 console.log("--- 6. Testing Watch History Analytics Aggregation ---");
 const now = new Date();
-const todaySession = new Date(now.getTime() - 15 * 60 * 1000).toISOString();
+const todaySession = now.toISOString();
 logWatchSession({
   mediaId: m1.id,
   startedAt: todaySession,
-  stoppedAt: now.toISOString(),
+  stoppedAt: todaySession,
   startPosition: 0,
   stopPosition: 580,
   duration: 580,

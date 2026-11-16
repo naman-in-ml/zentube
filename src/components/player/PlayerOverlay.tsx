@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   Headphones,
   Maximize2,
   Minimize2,
@@ -110,6 +111,21 @@ export function PlayerOverlay({ item, initialSeek, onClose, onDelete }: Props) {
       // ignore
     }
     showToast(next ? "🎧 Audio-Only Mode: ON" : "🎬 Video Mode: ON");
+  }
+
+  async function copyTranscriptForNotebookLM() {
+    if (!item) return;
+    try {
+      const result = await window.zentube.library.getTranscript(item.id);
+      if (result && result.hasTranscript && result.text) {
+        await navigator.clipboard.writeText(result.text);
+        showToast("✨ Copied transcript for NotebookLM!");
+      } else {
+        showToast("No transcript available for this video");
+      }
+    } catch {
+      showToast("Could not copy transcript");
+    }
   }
 
   async function togglePiP() {
@@ -412,6 +428,19 @@ export function PlayerOverlay({ item, initialSeek, onClose, onDelete }: Props) {
               <Subtitles size={16} />
               <span className="btn-label">CC</span>
             </button>
+
+            {/* Copy for NotebookLM */}
+            {subtitleUrl && (
+              <button
+                className="player-header-btn"
+                onClick={() => void copyTranscriptForNotebookLM()}
+                title="Copy clean transcript for NotebookLM / AI"
+                type="button"
+              >
+                <BookOpen size={16} />
+                <span className="btn-label">NotebookLM</span>
+              </button>
+            )}
 
             {/* Picture-in-Picture / Mini-player */}
             <button

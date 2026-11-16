@@ -20,6 +20,10 @@ import {
   listMediaItems
 } from "../services/library/libraryService.js";
 import {
+  getMediaTranscript,
+  getPlaylistTranscript
+} from "../services/library/transcriptService.js";
+import {
   addItemToPlaylist,
   createPlaylist,
   deletePlaylist,
@@ -114,6 +118,11 @@ export function registerIpcHandlers() {
     });
   });
 
+  ipcMain.handle("library:getTranscript", (_event, raw: unknown) => {
+    const { mediaId } = z.object({ mediaId: z.string().uuid() }).parse(raw);
+    return getMediaTranscript(mediaId);
+  });
+
   ipcMain.handle("playlists:list", () => listPlaylists());
 
   ipcMain.handle("playlists:listWithSummary", () => listPlaylistsWithSummary());
@@ -148,6 +157,11 @@ export function registerIpcHandlers() {
       .parse(raw);
     removeItemFromPlaylist(playlistId, mediaId);
     return true;
+  });
+
+  ipcMain.handle("playlists:getTranscript", (_event, raw: unknown) => {
+    const { playlistId } = z.object({ playlistId: z.string().uuid() }).parse(raw);
+    return getPlaylistTranscript(playlistId);
   });
 
   const mediaIdSchema = z.object({ mediaId: z.string().uuid() });

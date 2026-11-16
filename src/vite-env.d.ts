@@ -242,6 +242,7 @@ interface Window {
       list: () => Promise<MediaItem[]>;
       delete: (id: string, deleteFileFromDisk?: boolean) => Promise<boolean>;
       importFiles: () => Promise<MediaItem[]>;
+      getTranscript: (mediaId: string) => Promise<{ hasTranscript: boolean; title: string; text: string | null }>;
     };
     playlists: {
       list: () => Promise<Playlist[]>;
@@ -251,6 +252,7 @@ interface Window {
       delete: (playlistId: string) => Promise<boolean>;
       addItem: (playlistId: string, mediaId: string) => Promise<boolean>;
       removeItem: (playlistId: string, mediaId: string) => Promise<boolean>;
+      getTranscript: (playlistId: string) => Promise<{ hasTranscript: boolean; title: string; text: string | null; videoCount: number }>;
     };
     goals: {
       list: () => Promise<GoalSummary[]>;
