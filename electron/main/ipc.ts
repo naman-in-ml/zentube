@@ -67,7 +67,8 @@ const startDownloadSchema = z.object({
         id: z.string().min(1),
         title: z.string().min(1),
         duration: z.number().nullable().optional(),
-        url: z.string().min(8)
+        url: z.string().min(8),
+        description: z.string().nullable().optional()
       })
     )
     .min(1)

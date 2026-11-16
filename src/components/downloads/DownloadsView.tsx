@@ -1,4 +1,14 @@
-import { Check, Download, Link2, Loader2, ShieldCheck, Square, X } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  Link2,
+  Loader2,
+  ShieldCheck,
+  Square,
+  X
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { formatDuration } from "../../lib/format";
 
@@ -21,6 +31,7 @@ export function DownloadsView({ onLibraryChanged, mediaItems }: Props) {
   const [resolving, setResolving] = useState(false);
   const [resolved, setResolved] = useState<DownloadResolveResult | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [expandedDescriptions, setExpandedDescriptions] = useState<Set<string>>(new Set());
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tools, setTools] = useState<{ ytDlp: boolean; ytDlpVersion: string | null; ffmpeg: boolean } | null>(null);
@@ -100,6 +111,20 @@ export function DownloadsView({ onLibraryChanged, mediaItems }: Props) {
   function toggleEntry(id: string) {
     setSelected((current) => {
       const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function toggleDescription(id: string, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setExpandedDescriptions((prev) => {
+      const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
       } else {
@@ -234,28 +259,47 @@ export function DownloadsView({ onLibraryChanged, mediaItems }: Props) {
           <div className="dl-entry-list">
             {resolved.entries.map((entry) => {
               const checked = selected.has(entry.id);
+              const isExpanded = expandedDescriptions.has(entry.id);
               return (
-                <label className={checked ? "dl-entry selected" : "dl-entry"} key={entry.id}>
-                  <input checked={checked} onChange={() => toggleEntry(entry.id)} type="checkbox" />
-                  <img
-                    alt=""
-                    className="dl-entry-thumb"
-                    loading="lazy"
-                    onError={(event) => {
-                      event.currentTarget.style.visibility = "hidden";
-                    }}
-                    src={`https://i.ytimg.com/vi/${entry.id}/hqdefault.jpg`}
-                  />
-                  <div>
-                    <strong>{entry.title}</strong>
-                    <div className="dl-entry-meta">
-                      <span>{entry.duration ? formatDuration(entry.duration) : "—"}</span>
-                      {isDownloaded(entry) && (
-                        <span className="dl-entry-exists-badge">Downloaded</span>
-                      )}
+                <div className={`dl-entry-item ${checked ? "selected" : ""}`} key={entry.id}>
+                  <label className="dl-entry">
+                    <input checked={checked} onChange={() => toggleEntry(entry.id)} type="checkbox" />
+                    <img
+                      alt=""
+                      className="dl-entry-thumb"
+                      loading="lazy"
+                      onError={(event) => {
+                        event.currentTarget.style.visibility = "hidden";
+                      }}
+                      src={`https://i.ytimg.com/vi/${entry.id}/hqdefault.jpg`}
+                    />
+                    <div>
+                      <strong>{entry.title}</strong>
+                      <div className="dl-entry-meta">
+                        <span>{entry.duration ? formatDuration(entry.duration) : "—"}</span>
+                        {isDownloaded(entry) && (
+                          <span className="dl-entry-exists-badge">Downloaded</span>
+                        )}
+                        {entry.description && (
+                          <button
+                            className="dl-desc-toggle"
+                            onClick={(e) => toggleDescription(entry.id, e)}
+                            title={isExpanded ? "Collapse video description" : "Preview video description"}
+                            type="button"
+                          >
+                            {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                            <span>{isExpanded ? "Hide overview" : "Overview"}</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </label>
+                  </label>
+                  {isExpanded && entry.description && (
+                    <div className="dl-entry-desc-preview">
+                      <p>{entry.description}</p>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>

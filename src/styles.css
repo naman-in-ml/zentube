@@ -1523,6 +1523,51 @@ h1 {
   font-weight: 600;
 }
 
+.dl-entry-item {
+  border-bottom: 1px solid #222222;
+  transition: background 0.15s ease;
+}
+
+.dl-entry-item.selected {
+  background: rgba(255, 0, 0, 0.05);
+}
+
+.dl-entry-item:last-child {
+  border-bottom: 0;
+}
+
+.dl-desc-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: transparent;
+  border: 0;
+  color: #60a5fa;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.dl-desc-toggle:hover {
+  text-decoration: underline;
+  color: #93c5fd;
+}
+
+.dl-entry-desc-preview {
+  margin: 0 18px 12px 146px;
+  padding: 10px 14px;
+  background: #141414;
+  border-left: 3px solid #3b82f6;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #cccccc;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
 .dl-section {
   margin-bottom: 24px;
 }

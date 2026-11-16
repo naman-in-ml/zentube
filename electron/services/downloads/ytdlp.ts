@@ -15,6 +15,7 @@ export type ResolvedEntry = {
   title: string;
   duration: number | null;
   url: string;
+  description?: string | null;
 };
 
 export type ResolveResult = {
@@ -177,12 +178,14 @@ function toEntry(data: Record<string, unknown>, originalUrl: string): ResolvedEn
   const title = typeof data.title === "string" ? data.title : "Untitled";
   const duration =
     typeof data.duration === "number" && Number.isFinite(data.duration) ? data.duration : null;
+  const description =
+    typeof data.description === "string" && data.description.trim() ? data.description.trim() : null;
   const url =
     (typeof data.webpage_url === "string" && data.webpage_url) ||
     (typeof data.url === "string" && data.url) ||
     fallbackUrl(id, originalUrl);
 
-  return { id, title, duration, url };
+  return { id, title, duration, url, description };
 }
 
 function fallbackUrl(id: string, originalUrl: string): string {

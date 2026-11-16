@@ -75,6 +75,7 @@ type DownloadEntry = {
   title: string;
   duration: number | null;
   url: string;
+  description?: string | null;
 };
 
 type DownloadResolveResult = {
