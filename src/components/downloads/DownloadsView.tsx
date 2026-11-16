@@ -1,4 +1,4 @@
-import { Check, Download, Link2, Loader2, Square, X } from "lucide-react";
+import { Check, Download, Link2, Loader2, ShieldCheck, Square, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { formatDuration } from "../../lib/format";
 
@@ -151,6 +151,10 @@ export function DownloadsView({ onLibraryChanged, mediaItems }: Props) {
         <div>
           <h1>Downloads</h1>
           <p>Paste a YouTube link, pick a quality, download offline to {`~/Zentube`}.</p>
+        </div>
+        <div className="badge success" title="SponsorBlock automatically cuts sponsored segments, promos, and interaction reminders">
+          <ShieldCheck size={14} />
+          <span>SponsorBlock Active (Ads Cut)</span>
         </div>
       </div>
 

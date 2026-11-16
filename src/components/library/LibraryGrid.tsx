@@ -130,6 +130,9 @@ export function LibraryGrid({ items, selectedId, onSelect, onDelete }: Props) {
                   <span className="yt-meta">
                     {item.fileSizeBytes ? formatBytes(item.fileSizeBytes) : "Local file"} ·{" "}
                     {new Date(item.addedAt).toLocaleDateString()}
+                    <span className="yt-badge-adfree" title="SponsorBlock removed sponsored promos, ads & intros">
+                      ⚡ Ad-free
+                    </span>
                   </span>
                 </>
               )}

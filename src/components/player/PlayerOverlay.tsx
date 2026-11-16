@@ -6,6 +6,7 @@ import {
   Minus,
   PictureInPicture2,
   Plus,
+  ShieldCheck,
   Subtitles,
   Trash2,
   Video,
@@ -394,10 +395,14 @@ export function PlayerOverlay({ item, initialSeek, onClose, onDelete }: Props) {
         <header className="player-header">
           <div className="player-heading">
             <strong>{item.title}</strong>
-            <span>
+            <span style={{ display: "inline-flex", alignItems: "center", flexWrap: "wrap", gap: "6px" }}>
               {formatBytes(item.fileSizeBytes)}
               {duration ? ` · ${duration}` : ""}
               {isAudioOnly ? " · 🎧 Audio Mode" : ""}
+              <span className="player-ad-badge" title="SponsorBlock removed sponsored, self-promo & interaction segments">
+                <ShieldCheck size={12} />
+                Ad & Sponsor Free
+              </span>
             </span>
           </div>
 
